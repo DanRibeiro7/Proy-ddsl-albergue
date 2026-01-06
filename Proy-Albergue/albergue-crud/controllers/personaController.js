@@ -217,12 +217,44 @@ const obtenerPersonasPorTipo = async (req, res) => {
         });
     }
 };
+const buscarPorDni = async (req, res) => {
+    try {
+        const { dni } = req.params;
 
+        // Buscamos solo por la columna dni
+        const [persona] = await db.query(`
+            SELECT * FROM persona WHERE dni = ?
+        `, [dni]);
+
+        if (persona.length === 0) {
+            // Es importante devolver success: true con data: null
+            // para que el Frontend sepa que no hubo error técnico, solo que no existe.
+            return res.json({
+                success: true, 
+                data: null, 
+                mensaje: "Persona no encontrada"
+            });
+        }
+
+        res.json({
+            success: true,
+            data: persona[0]
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            mensaje: "Error al buscar por DNI",
+            error: error.message
+        });
+    }
+};  
 module.exports = {
     obtenerPersonas,
     obtenerPersonaPorId,
     crearPersona,
     actualizarPersona,
     eliminarPersona,
-    obtenerPersonasPorTipo
+    obtenerPersonasPorTipo,
+    buscarPorDni
 };

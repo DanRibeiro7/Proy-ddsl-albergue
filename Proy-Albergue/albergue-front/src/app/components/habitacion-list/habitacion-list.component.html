@@ -1,0 +1,93 @@
+<div class="container-fluid px-4 mt-4"> 
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold text-dark m-0">Gestión de Habitaciones</h2>
+    <button class="btn btn-primary" (click)="cargarHabitaciones()">
+      <i class="bi bi-arrow-clockwise"></i> Actualizar
+    </button>
+  </div>
+
+  <div class="card mb-5 border-0 shadow-sm" style="background-color: #f8f9fa;">
+    <div class="card-header bg-white border-bottom-0 py-3">
+      <h5 class="fw-bold text-primary m-0">
+        <i class="bi bi-mortarboard-fill me-2"></i> Pabellón Estudiantes
+        <span class="badge bg-primary rounded-pill ms-2">1 - 10</span>
+      </h5>
+    </div>
+
+    <div class="card-body">
+      <div class="row g-4"> 
+        <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6" *ngFor="let hab of habitacionesEstudiantes">
+          
+          <div class="room-card"
+               [class.available]="hab.estado === 'DISPONIBLE'"
+               [class.occupied]="hab.estado === 'OCUPADA'"
+               (click)="gestionarHabitacion(hab)">
+            
+            <div class="room-number">
+              {{ hab.numero_habitacion }}
+            </div>
+
+            <div class="room-info">
+              <span class="room-status">
+                {{ hab.estado === 'DISPONIBLE' ? 'Disponible' : 'Ocupada' }}
+              </span>
+              <small class="text-uppercase fw-bold opacity-75">Piso {{ hab.piso }}</small>
+            </div>
+
+            <button *ngIf="hab.estado === 'OCUPADA'" 
+                    class="btn btn-light text-danger btn-sm fw-bold w-100 mt-3 shadow-sm"
+                    (click)="liberarHabitacion(hab.idhabitacion!); $event.stopPropagation()">
+              <i class="bi bi-box-arrow-right"></i> Liberar
+            </button>
+          </div>
+
+        </div>
+      </div>
+      
+      <div *ngIf="habitacionesEstudiantes.length === 0" class="text-center py-5 text-muted">
+         <i class="bi bi-inbox fs-1"></i>
+         <p>No hay habitaciones de estudiantes registradas.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm" style="background-color: #f8f9fa;">
+    <div class="card-header bg-white border-bottom-0 py-3">
+      <h5 class="fw-bold text-info m-0">
+        <i class="bi bi-heart-pulse-fill me-2"></i> Pabellón Pacientes
+        <span class="badge bg-info text-dark rounded-pill ms-2">11 - 20</span>
+      </h5>
+    </div>
+
+    <div class="card-body">
+      <div class="row g-4">
+        <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6" *ngFor="let hab of habitacionesPacientes">
+          
+          <div class="room-card"
+               [class.available]="hab.estado === 'DISPONIBLE'"
+               [class.occupied]="hab.estado === 'OCUPADA'"
+               (click)="gestionarHabitacion(hab)">
+            
+            <div class="room-number">
+              {{ hab.numero_habitacion }}
+            </div>
+
+            <div class="room-info">
+              <span class="room-status">
+                {{ hab.estado === 'DISPONIBLE' ? 'Disponible' : 'Ocupada' }}
+              </span>
+              <small class="text-uppercase fw-bold opacity-75">Piso {{ hab.piso }}</small>
+            </div>
+
+            <button *ngIf="hab.estado === 'OCUPADA'" 
+                    class="btn btn-light text-danger btn-sm fw-bold w-100 mt-3 shadow-sm"
+                    (click)="liberarHabitacion(hab.idhabitacion!); $event.stopPropagation()">
+              <i class="bi bi-box-arrow-right"></i> Liberar
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

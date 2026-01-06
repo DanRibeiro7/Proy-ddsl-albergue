@@ -1,0 +1,103 @@
+/* Estilo base de la tarjeta */
+.room-card {
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  min-height: 160px; /* Altura mínima uniforme */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid rgba(0,0,0,0.05);
+}
+
+/* Efecto Hover (Levantar tarjeta) */
+.room-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* --- ESTADO DISPONIBLE (VERDE) --- */
+.room-card.available {
+  background: linear-gradient(135deg, #ffffff 0%, #e8f5e9 100%);
+  border-left: 5px solid #2e7d32; /* Borde verde fuerte a la izquierda */
+  color: #2e7d32;
+}
+
+.room-card.available .room-number {
+  color: #2e7d32;
+  font-weight: 800;
+}
+
+.room-card.available .room-status {
+  background-color: #c8e6c9;
+  color: #1b5e20;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* --- ESTADO OCUPADA (ROJO) --- */
+.room-card.occupied {
+  background: linear-gradient(135deg, #ef5350 0%, #d32f2f 100%);
+  color: white;
+  border: none;
+}
+
+.room-card.occupied .room-number {
+  color: white;
+  font-weight: 800;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+}
+
+.room-card.occupied .room-status {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* --- TIPOGRAFÍA --- */
+.room-number {
+  font-size: 2.5rem; /* Número grande */
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+
+.room-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: center;
+}
+
+.room-info small {
+  font-size: 0.85rem;
+  opacity: 0.8;
+  margin-top: 4px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* --- BOTÓN LIBERAR --- */
+/* Solo aparece en las ocupadas, lo hacemos resaltar */
+.room-card button {
+  margin-top: 10px;
+  border-radius: 20px;
+  font-weight: 600;
+  width: 100%;
+  transition: background 0.2s;
+}
+
+.room-card button:hover {
+  background-color: white;
+  color: #d32f2f;
+}

@@ -1,0 +1,90 @@
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Nuevo Registro de Ingreso</h2>
+    <span class="badge bg-primary fs-5">Habitación #{{ habitacionId }}</span>
+  </div>
+
+  <div class="row">
+    <div class="col-md-7">
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white">
+          <h5 class="m-0 text-primary"><i class="bi bi-person-vcard"></i> Datos del Huésped</h5>
+        </div>
+        <div class="card-body">
+          
+          <div class="mb-3">
+            <label class="form-label">DNI / Documento</label>
+            <div class="input-group">
+              <input type="text" class="form-control" [(ngModel)]="persona.dni" 
+                     (blur)="buscarDni()" placeholder="Ingrese 8 dígitos y presione Tab" maxlength="8">
+              <button class="btn btn-outline-secondary" type="button" (click)="buscarDni()">
+                <i class="bi bi-search"></i>
+              </button>
+            </div>
+            <small class="text-muted">El sistema buscará si el cliente ya existe.</small>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Nombres</label>
+              <input type="text" class="form-control" [(ngModel)]="persona.nombres">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Apellidos</label>
+              <input type="text" class="form-control" [(ngModel)]="persona.apellidos">
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Procedencia / Comunidad</label>
+            <input type="text" class="form-control" [(ngModel)]="persona.procedencia" placeholder="Ej: Comunidad Nativa X">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Teléfono (Opcional)</label>
+            <input type="text" class="form-control" [(ngModel)]="persona.telefono">
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-5">
+      <div class="card shadow-sm border-primary">
+        <div class="card-header bg-primary text-white">
+          <h5 class="m-0"><i class="bi bi-calendar-check"></i> Detalle del Alojamiento</h5>
+        </div>
+        <div class="card-body">
+          
+          <div class="mb-3">
+            <label class="form-label fw-bold">Tipo de Huésped</label>
+            <input type="text" class="form-control" [value]="tipoHabitacion" readonly disabled>
+            <small class="text-danger" *ngIf="tipoHabitacion === 'ESTUDIANTE'">* Habitación exclusiva para estudiantes</small>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Fecha de Ingreso</label>
+            <input type="date" class="form-control" [(ngModel)]="fechaIngreso">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Fecha de Salida (Estimada)</label>
+            <input type="date" class="form-control" [(ngModel)]="fechaSalida">
+          </div>
+
+          <hr>
+
+          <div class="d-grid gap-2">
+            <button class="btn btn-success btn-lg" (click)="guardarRegistro()" [disabled]="isLoading">
+              <i class="bi bi-save"></i> {{ isLoading ? 'Guardando...' : 'Confirmar Ingreso' }}
+            </button>
+            <button class="btn btn-secondary" (click)="cancelar()">
+              Cancelar
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

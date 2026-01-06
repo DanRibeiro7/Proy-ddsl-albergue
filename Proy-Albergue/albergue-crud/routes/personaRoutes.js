@@ -5,6 +5,7 @@ const {
     obtenerPersonas,
     obtenerPersonaPorId,
     crearPersona,
+    buscarPorDni,
     actualizarPersona,
     eliminarPersona,
     obtenerPersonasPorTipo
@@ -14,7 +15,7 @@ const {
 router.get('/', obtenerPersonas);
 router.get('/:id', obtenerPersonaPorId);
 router.get('/tipo/:id', obtenerPersonasPorTipo);
-
+router.get('/buscar/:dni', buscarPorDni);
 // POST
 router.post('/', crearPersona);
 
