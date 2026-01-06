@@ -1,6 +1,6 @@
 const db = require('../config/database');
 
-// Obtener todas las personas
+// 1. Obtener todas las personas
 const obtenerPersonas = async (req, res) => {
     try {
         const [personas] = await db.query(`
@@ -15,7 +15,6 @@ const obtenerPersonas = async (req, res) => {
             count: personas.length,
             data: personas
         });
-
     } catch (error) {
         res.status(500).json({
             success: false,
@@ -25,11 +24,10 @@ const obtenerPersonas = async (req, res) => {
     }
 };
 
-// Obtener persona por ID
+// 2. Obtener persona por ID
 const obtenerPersonaPorId = async (req, res) => {
     try {
         const { id } = req.params;
-
         const [persona] = await db.query(`
             SELECT p.*, tp.nombre AS tipoPersona
             FROM persona p
@@ -48,7 +46,6 @@ const obtenerPersonaPorId = async (req, res) => {
             success: true,
             data: persona[0]
         });
-
     } catch (error) {
         res.status(500).json({
             success: false,
@@ -58,47 +55,55 @@ const obtenerPersonaPorId = async (req, res) => {
     }
 };
 
-// Crear persona
+// 3. Crear o Actualizar Persona (LÓGICA CORREGIDA PARA EVITAR ERROR 500)
 const crearPersona = async (req, res) => {
     try {
-        const {
-            dni,
-            nombres,
-            apellidos,
-            telefono,
-            procedencia,
-            idtipo_persona
-        } = req.body;
+        const { dni, nombres, apellidos, telefono, procedencia, idtipo_persona } = req.body;
 
-        if (!dni || !nombres || !apellidos || !idtipo_persona) {
+        // Validaciones básicas (Apellidos es obligatorio en tu BD)
+        if (!dni || !nombres || !apellidos) {
             return res.status(400).json({
                 success: false,
-                mensaje: "Datos obligatorios faltantes"
+                mensaje: "Faltan datos obligatorios (DNI, Nombres o Apellidos)"
             });
         }
 
-        const [resultado] = await db.query(
-            `INSERT INTO persona
-             (dni, nombres, apellidos, telefono, procedencia, idtipo_persona)
-             VALUES (?, ?, ?, ?, ?, ?)`,
-            [dni, nombres, apellidos, telefono, procedencia, idtipo_persona]
-        );
+        // VERIFICACIÓN INTELIGENTE: ¿Existe ya este DNI?
+        const [existente] = await db.query('SELECT idpersona FROM persona WHERE dni = ?', [dni]);
 
-        res.status(201).json({
-            success: true,
-            mensaje: "Persona registrada correctamente",
-            data: {
-                idpersona: resultado.insertId,
-                dni,
-                nombres,
-                apellidos,
-                telefono,
-                procedencia,
-                idtipo_persona
-            }
-        });
+        if (existente.length > 0) {
+            // === SI EXISTE: ACTUALIZAMOS (UPDATE) ===
+            const id = existente[0].idpersona;
+            await db.query(
+                `UPDATE persona 
+                 SET nombres=?, apellidos=?, telefono=?, procedencia=?, idtipo_persona=? 
+                 WHERE idpersona=?`,
+                [nombres, apellidos, telefono, procedencia, idtipo_persona, id]
+            );
+            
+            return res.json({
+                success: true,
+                mensaje: 'Datos de persona actualizados correctamente',
+                data: { idpersona: id } // Devolvemos el ID para que el frontend pueda seguir
+            });
+
+        } else {
+            // === SI NO EXISTE: CREAMOS (INSERT) ===
+            const [resultado] = await db.query(
+                `INSERT INTO persona (dni, nombres, apellidos, telefono, procedencia, idtipo_persona, estado)
+                 VALUES (?, ?, ?, ?, ?, ?, 'ACTIVO')`,
+                [dni, nombres, apellidos, telefono, procedencia, idtipo_persona || 2] // Default a 2 (Estudiante) si falta
+            );
+
+            return res.status(201).json({
+                success: true,
+                mensaje: "Persona registrada correctamente",
+                data: { idpersona: resultado.insertId }
+            });
+        }
 
     } catch (error) {
+        console.error("Error SQL al guardar persona:", error);
         res.status(500).json({
             success: false,
             mensaje: "Error al registrar persona",
@@ -107,95 +112,53 @@ const crearPersona = async (req, res) => {
     }
 };
 
-// Actualizar persona
+// 4. Actualizar persona (Endpoint explícito PUT)
 const actualizarPersona = async (req, res) => {
     try {
         const { id } = req.params;
-        const {
-            dni,
-            nombres,
-            apellidos,
-            telefono,
-            procedencia,
-            idtipo_persona,
-            estado
-        } = req.body;
+        const { dni, nombres, apellidos, telefono, procedencia, idtipo_persona, estado } = req.body;
 
-        const [personaExistente] = await db.query(
-            'SELECT * FROM persona WHERE idpersona = ?',
-            [id]
-        );
+        const [personaExistente] = await db.query('SELECT idpersona FROM persona WHERE idpersona = ?', [id]);
 
         if (personaExistente.length === 0) {
-            return res.status(404).json({
-                success: false,
-                mensaje: "Persona no encontrada"
-            });
+            return res.status(404).json({ success: false, mensaje: "Persona no encontrada" });
         }
 
         await db.query(
             `UPDATE persona
-             SET dni=?, nombres=?, apellidos=?, telefono=?, procedencia=?, 
-                 idtipo_persona=?, estado=?
+             SET dni=?, nombres=?, apellidos=?, telefono=?, procedencia=?, idtipo_persona=?, estado=?
              WHERE idpersona=?`,
             [dni, nombres, apellidos, telefono, procedencia, idtipo_persona, estado, id]
         );
 
-        res.status(201).json({
-            success: true,
-            mensaje: "Persona actualizada correctamente"
-        });
-
+        res.status(201).json({ success: true, mensaje: "Persona actualizada correctamente" });
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            mensaje: "Error al actualizar persona",
-            error: error.message
-        });
+        res.status(500).json({ success: false, mensaje: "Error al actualizar persona", error: error.message });
     }
 };
 
-// Eliminar persona
+// 5. Eliminar persona
 const eliminarPersona = async (req, res) => {
     try {
         const { id } = req.params;
-
-        const [personaExistente] = await db.query(
-            'SELECT * FROM persona WHERE idpersona = ?',
-            [id]
-        );
+        const [personaExistente] = await db.query('SELECT idpersona FROM persona WHERE idpersona = ?', [id]);
 
         if (personaExistente.length === 0) {
-            return res.status(404).json({
-                success: false,
-                mensaje: "Persona no encontrada"
-            });
+            return res.status(404).json({ success: false, mensaje: "Persona no encontrada" });
         }
 
-        await db.query(
-            'DELETE FROM persona WHERE idpersona = ?',
-            [id]
-        );
+        await db.query('DELETE FROM persona WHERE idpersona = ?', [id]);
 
-        res.json({
-            success: true,
-            mensaje: "Persona eliminada correctamente"
-        });
-
+        res.json({ success: true, mensaje: "Persona eliminada correctamente" });
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            mensaje: "Error al eliminar persona",
-            error: error.message
-        });
+        res.status(500).json({ success: false, mensaje: "Error al eliminar persona", error: error.message });
     }
 };
 
-// Obtener personas por tipo
+// 6. Obtener personas por tipo
 const obtenerPersonasPorTipo = async (req, res) => {
     try {
         const { id } = req.params;
-
         const [personas] = await db.query(`
             SELECT p.*, tp.nombre AS tipoPersona
             FROM persona p
@@ -203,52 +166,28 @@ const obtenerPersonasPorTipo = async (req, res) => {
             WHERE p.idtipo_persona = ?
         `, [id]);
 
-        res.json({
-            success: true,
-            count: personas.length,
-            data: personas
-        });
-
+        res.json({ success: true, count: personas.length, data: personas });
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            mensaje: "Error al obtener personas por tipo",
-            error: error.message
-        });
+        res.status(500).json({ success: false, mensaje: "Error al obtener personas por tipo", error: error.message });
     }
 };
+
+// 7. Buscar por DNI (Para autocompletar)
 const buscarPorDni = async (req, res) => {
     try {
         const { dni } = req.params;
-
-        // Buscamos solo por la columna dni
-        const [persona] = await db.query(`
-            SELECT * FROM persona WHERE dni = ?
-        `, [dni]);
+        const [persona] = await db.query('SELECT * FROM persona WHERE dni = ?', [dni]);
 
         if (persona.length === 0) {
-            // Es importante devolver success: true con data: null
-            // para que el Frontend sepa que no hubo error técnico, solo que no existe.
-            return res.json({
-                success: true, 
-                data: null, 
-                mensaje: "Persona no encontrada"
-            });
+            return res.json({ success: true, data: null, mensaje: "Persona no encontrada" });
         }
 
-        res.json({
-            success: true,
-            data: persona[0]
-        });
-
+        res.json({ success: true, data: persona[0] });
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            mensaje: "Error al buscar por DNI",
-            error: error.message
-        });
+        res.status(500).json({ success: false, mensaje: "Error al buscar por DNI", error: error.message });
     }
-};  
+};
+
 module.exports = {
     obtenerPersonas,
     obtenerPersonaPorId,

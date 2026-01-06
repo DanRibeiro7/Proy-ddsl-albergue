@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { HabitacionService } from '../../services/habitacion.service';
-import { habitacion } from '../../models/habitacion.interface';
+import { Habitacion } from '../../models/habitacion.interface';
 
 @Component({
   selector: 'app-habitacion-list',
@@ -13,8 +13,8 @@ import { habitacion } from '../../models/habitacion.interface';
 })
 export class HabitacionListComponent implements OnInit {
 
-  habitacionesEstudiantes: habitacion[] = [];
-  habitacionesPacientes: habitacion[] = [];
+  habitacionesEstudiantes: Habitacion[] = [];
+  habitacionesPacientes: Habitacion[] = [];
 
   constructor(
     private habitacionService: HabitacionService,
@@ -30,7 +30,7 @@ export class HabitacionListComponent implements OnInit {
       next: (response) => {
         if (response.success && Array.isArray(response.data)) {
           // Casteamos la data
-          const lista = response.data as habitacion[];
+          const lista = response.data as Habitacion[];
 
           // Filtramos por pabellón
           this.habitacionesEstudiantes = lista.filter(h => h.tipo === 'ESTUDIANTE');
@@ -42,7 +42,7 @@ export class HabitacionListComponent implements OnInit {
   }
 
   // --- LÓGICA PRINCIPAL DEL FLUJO ---
-  gestionarHabitacion(hab: habitacion): void {
+  gestionarHabitacion(hab: Habitacion): void {
     if (hab.estado === 'DISPONIBLE') {
       // CASO 1: Está libre -> Vamos al Registro (Check-in)
       this.router.navigate(['/registro'], { 

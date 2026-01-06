@@ -12,6 +12,7 @@ export class RegistroService {
 
   // Guardar el ingreso
   crearRegistro(registro: Registro): Observable<ApiResponse> {
-    return this.http.post<ApiResponse>(this.apiUrl, registro);
+    // CORRECCIÓN: Agregamos '/ingreso' para coincidir con el backend
+    return this.http.post<ApiResponse>(`${this.apiUrl}/ingreso`, registro);
   }
 }

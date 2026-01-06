@@ -57,9 +57,36 @@
         <div class="card-body">
           
           <div class="mb-3">
-            <label class="form-label fw-bold">Tipo de Huésped</label>
-            <input type="text" class="form-control" [value]="tipoHabitacion" readonly disabled>
-            <small class="text-danger" *ngIf="tipoHabitacion === 'ESTUDIANTE'">* Habitación exclusiva para estudiantes</small>
+            <label class="form-label fw-bold">Habitación</label>
+            
+            <div *ngIf="habitacionId > 0">
+              <div class="input-group">
+                <span class="input-group-text bg-success text-white fw-bold">#{{ habitacionId }}</span>
+                <input type="text" class="form-control" [value]="tipoHabitacion" readonly>
+                <button class="btn btn-outline-secondary" (click)="limpiarSeleccion()" title="Cambiar habitación">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+              </div>
+            </div>
+
+            <div *ngIf="habitacionId === 0">
+               <select class="form-select" [(ngModel)]="seleccionManual" (change)="seleccionarHabitacionManual()">
+                  <option value="" disabled selected>-- Seleccione Habitación --</option>
+                  <optgroup label="Estudiantes">
+                    <option *ngFor="let h of habitacionesEstudiantes" [value]="h.idhabitacion">
+                        Hab. {{h.numero_habitacion}} (Piso {{h.piso}})
+                    </option>
+                  </optgroup>
+                  <optgroup label="Pacientes">
+                    <option *ngFor="let h of habitacionesPacientes" [value]="h.idhabitacion">
+                        Hab. {{h.numero_habitacion}} (Piso {{h.piso}})
+                    </option>
+                  </optgroup>
+               </select>
+               <small class="text-muted" *ngIf="habitacionesEstudiantes.length === 0 && habitacionesPacientes.length === 0">
+                 Cargando habitaciones disponibles...
+               </small>
+            </div>
           </div>
 
           <div class="mb-3">

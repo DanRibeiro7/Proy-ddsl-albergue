@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../environment/environment';
-import { habitacionResponse } from '../models/habitacion.interface';
+import { HabitacionResponse } from '../models/habitacion.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -13,12 +13,12 @@ export class HabitacionService {
 
   constructor(private http: HttpClient) {}
 
-  obtenerHabitaciones(): Observable<habitacionResponse> {
-    return this.http.get<habitacionResponse>(this.apiUrl);
+  obtenerHabitaciones(): Observable<HabitacionResponse> {
+    return this.http.get<HabitacionResponse>(this.apiUrl);
   }
 
-  obtenerHabitacionPorId(id: number): Observable<habitacionResponse> {
-    return this.http.get<habitacionResponse>(`${this.apiUrl}/${id}`);
+  obtenerHabitacionPorId(id: number): Observable<HabitacionResponse> {
+    return this.http.get<HabitacionResponse>(`${this.apiUrl}/${id}`);
   }
 
   crearHabitacion(datos: any): Observable<any> {

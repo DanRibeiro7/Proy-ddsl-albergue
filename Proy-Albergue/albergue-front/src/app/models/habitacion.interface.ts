@@ -1,4 +1,4 @@
-export interface habitacion {
+export interface Habitacion {
     idhabitacion?: number;       
     numero_habitacion?: number;
     piso?: number;
@@ -7,9 +7,9 @@ export interface habitacion {
     estado?: 'DISPONIBLE' | 'OCUPADA' | 'MANTENIMIENTO';
 }
 
-export interface habitacionResponse {
+export interface HabitacionResponse {
     success: boolean;
-    data: habitacion | habitacion[];
+    data: Habitacion | Habitacion[];
     count?: number;
     message: string;
     error?: string;

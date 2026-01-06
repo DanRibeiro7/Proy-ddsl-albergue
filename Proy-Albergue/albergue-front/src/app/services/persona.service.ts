@@ -10,13 +10,28 @@ export class PersonaService {
 
   constructor(private http: HttpClient) { }
 
-  // Buscar persona por DNI
+  obtenerPersonas(): Observable<any> {
+    return this.http.get(this.apiUrl);
+  }
+
   buscarPorDni(dni: string): Observable<ApiResponse> {
     return this.http.get<ApiResponse>(`${this.apiUrl}/buscar/${dni}`);
   }
 
-  // Crear nueva persona
   crearPersona(datos: any): Observable<ApiResponse> {
     return this.http.post<ApiResponse>(this.apiUrl, datos);
+  }
+
+  obtenerPorId(id: number): Observable<ApiResponse> {
+    return this.http.get<ApiResponse>(`${this.apiUrl}/${id}`);
+  }
+
+  actualizarPersona(id: number, datos: any): Observable<ApiResponse> {
+    return this.http.put<ApiResponse>(`${this.apiUrl}/${id}`, datos);
+  }
+
+  // 👇 ESTE ES EL MÉTODO QUE TE FALTABA 👇
+  eliminarPersona(id: number): Observable<ApiResponse> {
+    return this.http.delete<ApiResponse>(`${this.apiUrl}/${id}`);
   }
 }
