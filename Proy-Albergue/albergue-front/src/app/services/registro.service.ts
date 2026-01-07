@@ -17,4 +17,7 @@ export class RegistroService {
     // CORRECCIÓN: Agregamos '/ingreso' para coincidir con el backend
     return this.http.post<ApiResponse>(`${this.apiUrl}/ingreso`, registro);
   }
+  liberarHabitacion(idHabitacion: number): Observable<any> {
+  return this.http.put(`${this.apiUrl}/liberar-habitacion/${idHabitacion}`, {});
+}
 }

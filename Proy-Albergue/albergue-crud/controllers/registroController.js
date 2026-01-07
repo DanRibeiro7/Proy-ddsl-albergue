@@ -159,9 +159,56 @@ const totalAlbergados = async (req, res) => {
     }
 };
 
+const liberarPorHabitacion = async (req, res) => {
+    try {
+        const { idhabitacion } = req.params;
+
+        // 1. Buscamos cuál es el registro ACTIVO de esa habitación
+        const [registros] = await db.query(
+            "SELECT idregistro FROM registro WHERE idhabitacion = ? AND estado = 'ACTIVO'",
+            [idhabitacion]
+        );
+
+        if (registros.length === 0) {
+            return res.status(404).json({ 
+                success: false, 
+                mensaje: 'No hay nadie hospedado en esta habitación actualmente.' 
+            });
+        }
+
+        const idregistro = registros[0].idregistro;
+        const fechaSalida = new Date(); // Fecha y hora actual
+
+        // 2. Cerramos ese registro (Ponemos fecha salida y estado FINALIZADO)
+        await db.query(
+            "UPDATE registro SET fecha_salida = ?, estado = 'FINALIZADO' WHERE idregistro = ?",
+            [fechaSalida, idregistro]
+        );
+
+        // 3. Liberamos la habitación (La ponemos en verde/DISPONIBLE)
+        await db.query(
+            "UPDATE habitacion SET estado = 'DISPONIBLE' WHERE idhabitacion = ?",
+            [idhabitacion]
+        );
+
+        res.json({ 
+            success: true, 
+            mensaje: 'Salida registrada y habitación liberada correctamente' 
+        });
+
+    } catch (error) {
+        res.status(500).json({ 
+            success: false, 
+            mensaje: 'Error al liberar habitación', 
+            error: error.message 
+        });
+    }
+};
+
 module.exports = {
     obtenerRegistros, 
     registrarIngreso,
     registrarSalida,
-    totalAlbergados
+    totalAlbergados,
+    liberarPorHabitacion
 };

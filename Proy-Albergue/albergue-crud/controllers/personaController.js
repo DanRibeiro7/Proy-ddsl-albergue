@@ -3,10 +3,19 @@ const db = require('../config/database');
 // 1. Obtener todas las personas
 const obtenerPersonas = async (req, res) => {
     try {
+        // MODIFICAMOS LA SQL PARA TRAER TODO DE UNA VEZ
         const [personas] = await db.query(`
-            SELECT p.*, tp.nombre AS tipoPersona
+            SELECT 
+                p.*, 
+                tp.nombre AS tipoPersona,
+                -- Datos de Estudiante
+                fe.institucion, fe.carrera, fe.ciclo_actual,
+                -- Datos de Paciente
+                fp.diagnostico, fp.hospital_origen, fp.codigo_sis
             FROM persona p
             INNER JOIN tipo_persona tp ON p.idtipo_persona = tp.idtipo_persona
+            LEFT JOIN ficha_estudiante fe ON p.idpersona = fe.idpersona
+            LEFT JOIN ficha_paciente fp ON p.idpersona = fp.idpersona
             ORDER BY p.idpersona DESC
         `);
 

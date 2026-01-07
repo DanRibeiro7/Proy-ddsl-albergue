@@ -7,7 +7,16 @@ export interface Persona {
     procedencia?: string;
     idtipo_persona?: number;
     
-    // Agregamos los objetos opcionales para enviar al backend
+    // === NUEVOS CAMPOS (Vienen del listado con JOIN) ===
+    institucion?: string;
+    carrera?: string;
+    ciclo_actual?: string;
+    
+    diagnostico?: string;
+    hospital_origen?: string;
+    codigo_sis?: string;
+
+    // === TUS OBJETOS PARA GUARDAR (Déjalos como estaban) ===
     datosPaciente?: {
         diagnostico: string;
         hospital: string;
@@ -29,7 +38,6 @@ export interface Registro {
     estado?: 'ACTIVO' | 'FINALIZADO';
 }
 
-// Respuesta estándar del API
 export interface ApiResponse {
     success: boolean;
     data: any;

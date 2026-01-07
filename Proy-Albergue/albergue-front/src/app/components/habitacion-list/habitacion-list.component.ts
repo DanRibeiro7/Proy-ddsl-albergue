@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { HabitacionService } from '../../services/habitacion.service';
 import { Habitacion } from '../../models/habitacion.interface';
+import { RegistroService } from '../../services/registro.service';
 
 @Component({
   selector: 'app-habitacion-list',
@@ -18,6 +19,7 @@ export class HabitacionListComponent implements OnInit {
 
   constructor(
     private habitacionService: HabitacionService,
+    private registroService: RegistroService,
     private router: Router // Inyección del Router
   ) { }
 
@@ -55,14 +57,23 @@ export class HabitacionListComponent implements OnInit {
     }
   }
 
-  liberarHabitacion(id: number): void {
-    if (confirm('¿Está seguro de liberar esta habitación? Se marcará como DISPONIBLE.')) {
-      this.habitacionService.actualizarEstado(id, 'DISPONIBLE').subscribe({
-        next: () => {
-          // alert('Habitación liberada correctamente'); // Opcional, a veces es molesto tantos alerts
-          this.cargarHabitaciones(); // Refrescamos la lista para ver el cambio a Verde
+  liberarHabitacion(idHabitacion: number): void {
+    if (confirm('¿Confirmar salida del huésped? Se cerrará el registro y la habitación quedará DISPONIBLE.')) {
+      
+      // Llamamos al servicio de REGISTRO, no al de habitación
+      this.registroService.liberarHabitacion(idHabitacion).subscribe({
+        next: (res) => {
+          if (res.success) {
+            alert('Salida registrada correctamente.');
+            this.cargarHabitaciones(); // Recargamos para ver la habitación verde y sin nombre
+          } else {
+            alert('Advertencia: ' + res.mensaje);
+          }
         },
-        error: (err) => alert('Error al liberar: ' + err.message)
+        error: (err) => {
+          console.error(err);
+          alert('Error al procesar la salida.');
+        }
       });
     }
   }
