@@ -1,5 +1,5 @@
 const db = require('../config/database');
-
+//tu viejo hilario
 // 1. Obtener todas las personas
 const obtenerPersonas = async (req, res) => {
     try {
