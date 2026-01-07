@@ -3,20 +3,23 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms'; // <--- 1. IMPORTANTE
 import { RouterLink } from '@angular/router';
 import { RegistroService } from '../../services/registro.service';
-
+declare var bootstrap: any;
 @Component({
   selector: 'app-registro-list',
   standalone: true,
   imports: [CommonModule, RouterLink, FormsModule], // <--- 2. AGREGAR AQUÍ
   templateUrl: './registro-list.component.html',
   styleUrls: ['./registro-list.component.css']
+  
 })
+
 export class RegistroListComponent implements OnInit {
 
   // Variables de datos
   listaCompleta: any[] = []; // Copia original
   listaFiltrada: any[] = []; // La que mostramos
   loading: boolean = true;
+  registroSeleccionado: any = null;
 
   // Variables de Filtro y Paginación
   textoBusqueda: string = '';
@@ -44,8 +47,23 @@ export class RegistroListComponent implements OnInit {
       }
     });
   }
-
-  // --- LÓGICA DE FILTRADO ---
+verDetalle(idRegistro: number) {
+    this.registroService.obtenerRegistroPorId(idRegistro).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.registroSeleccionado = res.data;
+          
+          // Abrir Modal de Bootstrap
+          const modalElement = document.getElementById('modalDetalleRegistro');
+          if (modalElement) {
+            const modal = new bootstrap.Modal(modalElement);
+            modal.show();
+          }
+        }
+      },
+      error: (err) => alert('Error al cargar el detalle')
+    });
+  }
   filtrar() {
     const texto = this.textoBusqueda.toLowerCase();
 

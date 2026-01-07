@@ -6,7 +6,8 @@ const {
     registrarIngreso,
     registrarSalida,
     totalAlbergados,
-    liberarPorHabitacion
+    liberarPorHabitacion,
+    obtenerRegistroPorId    
 } = require('../controllers/registroController');
 
 router.get('/', obtenerRegistros); 
@@ -14,5 +15,6 @@ router.post('/ingreso', registrarIngreso);
 router.put('/salida', registrarSalida);
 router.get('/total', totalAlbergados);
 router.put('/liberar-habitacion/:idhabitacion', liberarPorHabitacion);
+router.get('/:id', obtenerRegistroPorId);
 
 module.exports = router;

@@ -20,4 +20,9 @@ export class RegistroService {
   liberarHabitacion(idHabitacion: number): Observable<any> {
   return this.http.put(`${this.apiUrl}/liberar-habitacion/${idHabitacion}`, {});
 }
+// En RegistroService class...
+
+obtenerRegistroPorId(id: number): Observable<any> {
+  return this.http.get(`${this.apiUrl}/${id}`);
+}
 }

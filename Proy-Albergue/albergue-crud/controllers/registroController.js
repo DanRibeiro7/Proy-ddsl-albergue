@@ -208,11 +208,46 @@ const liberarPorHabitacion = async (req, res) => {
         });
     }
 };
+const obtenerRegistroPorId = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const connection = await db.getConnection();
 
+        const sql = `
+            SELECT 
+                r.idregistro, r.fecha_ingreso, r.fecha_salida, r.estado,
+                p.nombres, p.apellidos, p.dni, p.telefono, p.procedencia, p.idtipo_persona,
+                h.numero_habitacion, h.piso, h.tipo as tipo_habitacion,
+                -- Datos Estudiante
+                fe.institucion, fe.carrera, fe.ciclo_actual,
+                -- Datos Paciente
+                fp.diagnostico, fp.hospital_origen, fp.codigo_sis
+            FROM registro r
+            INNER JOIN persona p ON r.idpersona = p.idpersona
+            INNER JOIN habitacion h ON r.idhabitacion = h.idhabitacion
+            LEFT JOIN ficha_estudiante fe ON p.idpersona = fe.idpersona
+            LEFT JOIN ficha_paciente fp ON p.idpersona = fp.idpersona
+            WHERE r.idregistro = ?
+        `;
+
+        const [rows] = await connection.query(sql, [id]);
+        connection.release();
+
+        if (rows.length === 0) {
+            return res.status(404).json({ success: false, mensaje: 'Registro no encontrado' });
+        }
+
+        res.json({ success: true, data: rows[0] });
+
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+};
 module.exports = {
     obtenerRegistros, 
     registrarIngreso,
     registrarSalida,
     totalAlbergados,
-    liberarPorHabitacion
+    liberarPorHabitacion,
+    obtenerRegistroPorId
 };

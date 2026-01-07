@@ -1,18 +1,16 @@
 <div class="container mt-4">
-  
+
   <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
       <h2 class="fw-bold text-dark"><i class="bi bi-journal-text me-2"></i>Historial de Registros</h2>
       <p class="text-muted mb-0">Listado general de ingresos y salidas.</p>
     </div>
-    
+
     <div class="d-flex gap-2">
       <div class="input-group shadow-sm" style="max-width: 300px;">
         <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
-        <input type="text" class="form-control border-start-0 ps-0" 
-               placeholder="Buscar huésped, DNI o Hab..." 
-               [(ngModel)]="textoBusqueda" 
-               (keyup)="filtrar()">
+        <input type="text" class="form-control border-start-0 ps-0" placeholder="Buscar huésped, DNI o Hab..."
+          [(ngModel)]="textoBusqueda" (keyup)="filtrar()">
       </div>
 
       <button class="btn btn-primary shadow-sm" routerLink="/registro/nuevo">
@@ -24,7 +22,7 @@
   <div class="card shadow-sm border-0">
     <div class="card-body p-0">
       <div class="table-responsive">
-        
+
         <table class="table table-hover align-middle mb-0">
           <thead class="bg-light">
             <tr class="text-uppercase text-secondary small fw-bold">
@@ -36,9 +34,9 @@
             </tr>
           </thead>
           <tbody>
-            
+
             <tr *ngFor="let r of obtenerDatosPaginados()">
-              
+
               <td class="ps-4">
                 <div class="fw-bold text-dark">{{ r.nombre_huesped }}</div>
                 <small class="text-muted">DNI: {{ r.dni }}</small>
@@ -60,8 +58,7 @@
               </td>
 
               <td>
-                <span class="badge rounded-pill px-3 py-2"
-                  [ngClass]="{
+                <span class="badge rounded-pill px-3 py-2" [ngClass]="{
                     'bg-success-subtle text-success': r.estado === 'ACTIVO',
                     'bg-secondary-subtle text-secondary': r.estado === 'FINALIZADO'
                   }">
@@ -70,8 +67,8 @@
               </td>
 
               <td class="text-end pe-4">
-                <button class="btn btn-sm btn-outline-primary border-0 bg-primary-subtle text-primary" title="Ver detalles">
-                  <i class="bi bi-eye-fill"></i>
+                <button class="btn btn-sm btn-outline-primary border-0 bg-primary-subtle text-primary"
+                  title="Ver detalles" (click)="verDetalle(r.idregistro)"> <i class="bi bi-eye-fill"></i>
                 </button>
               </td>
             </tr>
@@ -90,11 +87,13 @@
 
       </div>
 
-      <div class="card-footer bg-white border-top-0 d-flex justify-content-between align-items-center py-3 px-4" *ngIf="listaFiltrada.length > 0">
+      <div class="card-footer bg-white border-top-0 d-flex justify-content-between align-items-center py-3 px-4"
+        *ngIf="listaFiltrada.length > 0">
         <span class="text-muted small">
-           Mostrando {{ ((paginaActual - 1) * itemsPorPagina) + 1 }} a 
-           {{ (paginaActual * itemsPorPagina) > listaFiltrada.length ? listaFiltrada.length : (paginaActual * itemsPorPagina) }} 
-           de {{ listaFiltrada.length }} registros
+          Mostrando {{ ((paginaActual - 1) * itemsPorPagina) + 1 }} a
+          {{ (paginaActual * itemsPorPagina) > listaFiltrada.length ? listaFiltrada.length : (paginaActual *
+          itemsPorPagina) }}
+          de {{ listaFiltrada.length }} registros
         </span>
 
         <nav aria-label="Navegación">
@@ -114,6 +113,103 @@
             </li>
           </ul>
         </nav>
+      </div>
+
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="modalDetalleRegistro" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg"> <div class="modal-content border-0 shadow-lg">
+      
+      <div class="modal-header text-white" 
+           [ngClass]="registroSeleccionado?.estado === 'ACTIVO' ? 'bg-success' : 'bg-secondary'">
+        <h5 class="modal-title fw-bold">
+          <i class="bi bi-journal-bookmark-fill me-2"></i>
+          Detalle del Hospedaje #{{ registroSeleccionado?.idregistro }}
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body p-4" *ngIf="registroSeleccionado">
+        
+        <div class="row mb-4 align-items-center">
+          <div class="col-md-8">
+            <h3 class="fw-bold text-dark mb-1">
+              {{ registroSeleccionado.nombres }} {{ registroSeleccionado.apellidos }}
+            </h3>
+            <span class="badge rounded-pill me-2" 
+                  [ngClass]="registroSeleccionado.idtipo_persona === 2 ? 'bg-success-subtle text-success' : 'bg-info-subtle text-info-emphasis'">
+              {{ registroSeleccionado.idtipo_persona === 2 ? 'Estudiante' : 'Paciente' }}
+            </span>
+            <span class="text-muted small"><i class="bi bi-geo-alt-fill"></i> {{ registroSeleccionado.procedencia }}</span>
+          </div>
+          <div class="col-md-4 text-md-end mt-3 mt-md-0">
+            <div class="border rounded p-2 text-center bg-light">
+              <small class="text-uppercase text-muted fw-bold d-block">Habitación</small>
+              <span class="fs-3 fw-bold text-primary">{{ registroSeleccionado.numero_habitacion }}</span>
+              <span class="d-block small text-muted">Piso {{ registroSeleccionado.piso }}</span>
+            </div>
+          </div>
+        </div>
+
+        <hr class="text-muted opacity-25">
+
+        <div class="row g-3 mb-4">
+          <div class="col-6">
+            <div class="p-3 rounded border border-success bg-success bg-opacity-10 h-100">
+              <small class="text-uppercase text-success fw-bold"><i class="bi bi-box-arrow-in-right"></i> Fecha Ingreso</small>
+              <div class="fs-5 fw-bold mt-1 text-dark">
+                {{ registroSeleccionado.fecha_ingreso | date:'dd/MM/yyyy' }}
+              </div>
+              <small class="text-muted">{{ registroSeleccionado.fecha_ingreso | date:'HH:mm a' }}</small>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="p-3 rounded border h-100" 
+                 [ngClass]="registroSeleccionado.fecha_salida ? 'border-secondary bg-secondary bg-opacity-10' : 'border-warning bg-warning bg-opacity-10'">
+              <small class="text-uppercase fw-bold" 
+                     [ngClass]="registroSeleccionado.fecha_salida ? 'text-secondary' : 'text-warning'">
+                <i class="bi bi-box-arrow-right"></i> Fecha Salida
+              </small>
+              <div class="fs-5 fw-bold mt-1 text-dark" *ngIf="registroSeleccionado.fecha_salida">
+                {{ registroSeleccionado.fecha_salida | date:'dd/MM/yyyy' }}
+              </div>
+              <div class="fs-5 fw-bold mt-1 text-muted fst-italic" *ngIf="!registroSeleccionado.fecha_salida">
+                -- En Estadía --
+              </div>
+              <small class="text-muted" *ngIf="registroSeleccionado.fecha_salida">
+                {{ registroSeleccionado.fecha_salida | date:'HH:mm a' }}
+              </small>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="registroSeleccionado.idtipo_persona === 2" class="card border-0 bg-light">
+          <div class="card-body">
+            <h6 class="fw-bold text-success mb-3"><i class="bi bi-mortarboard-fill me-2"></i>Información Académica</h6>
+            <div class="row">
+              <div class="col-sm-6 mb-2"><strong>Institución:</strong> {{ registroSeleccionado.institucion }}</div>
+              <div class="col-sm-6 mb-2"><strong>Carrera:</strong> {{ registroSeleccionado.carrera }}</div>
+              <div class="col-sm-6"><strong>Ciclo:</strong> {{ registroSeleccionado.ciclo_actual }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="registroSeleccionado.idtipo_persona === 1" class="card border-0 bg-light">
+          <div class="card-body">
+            <h6 class="fw-bold text-info mb-3"><i class="bi bi-hospital-fill me-2"></i>Información Médica</h6>
+            <div class="row">
+              <div class="col-12 mb-2"><strong>Diagnóstico:</strong> {{ registroSeleccionado.diagnostico }}</div>
+              <div class="col-sm-6 mb-2"><strong>Hospital:</strong> {{ registroSeleccionado.hospital_origen }}</div>
+              <div class="col-sm-6"><strong>Código SIS:</strong> {{ registroSeleccionado.codigo_sis }}</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="modal-footer bg-light border-0">
+        <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Cerrar</button>
       </div>
 
     </div>
