@@ -8,14 +8,15 @@ const obtenerPersonas = async (req, res) => {
             SELECT 
                 p.*, 
                 tp.nombre AS tipoPersona,
-                -- Datos de Estudiante
                 fe.institucion, fe.carrera, fe.ciclo_actual,
-                -- Datos de Paciente
                 fp.diagnostico, fp.hospital_origen, fp.codigo_sis
             FROM persona p
             INNER JOIN tipo_persona tp ON p.idtipo_persona = tp.idtipo_persona
             LEFT JOIN ficha_estudiante fe ON p.idpersona = fe.idpersona
             LEFT JOIN ficha_paciente fp ON p.idpersona = fp.idpersona
+            
+            WHERE p.estado = 'ACTIVO'  -- <--- AGREGA ESTA LÍNEA
+            
             ORDER BY p.idpersona DESC
         `);
 
@@ -208,24 +209,55 @@ const actualizarPersona = async (req, res) => {
     }
 };
 
-// 5. Eliminar persona
 const eliminarPersona = async (req, res) => {
+    const connection = await db.getConnection();
+    
     try {
         const { id } = req.params;
-        const [personaExistente] = await db.query('SELECT idpersona FROM persona WHERE idpersona = ?', [id]);
 
-        if (personaExistente.length === 0) {
+        // 1. Verificar si la persona existe
+        const [persona] = await connection.query('SELECT idpersona FROM persona WHERE idpersona = ?', [id]);
+        
+        if (persona.length === 0) {
+            connection.release();
             return res.status(404).json({ success: false, mensaje: "Persona no encontrada" });
         }
 
-        await db.query('DELETE FROM persona WHERE idpersona = ?', [id]);
+        // 2. (OPCIONAL PERO RECOMENDADO) 
+        // Validar que NO tenga un hospedaje ACTIVO en este momento.
+        // No tiene sentido desactivar a alguien que está durmiendo en una habitación.
+        const [hospedajeActivo] = await connection.query(
+            "SELECT idregistro FROM registro WHERE idpersona = ? AND estado = 'ACTIVO'", 
+            [id]
+        );
 
-        res.json({ success: true, mensaje: "Persona eliminada correctamente" });
+        if (hospedajeActivo.length > 0) {
+            connection.release();
+            return res.status(400).json({ 
+                success: false, 
+                mensaje: "No se puede eliminar: Esta persona está hospedada actualmente." 
+            });
+        }
+
+        // 3. REALIZAR EL BORRADO LÓGICO (Cambiar estado)
+        await connection.query(
+            "UPDATE persona SET estado = 'INACTIVO' WHERE idpersona = ?", 
+            [id]
+        );
+
+        connection.release();
+
+        res.json({ success: true, mensaje: "Persona desactivada correctamente" });
+
     } catch (error) {
-        res.status(500).json({ success: false, mensaje: "Error al eliminar persona", error: error.message });
+        connection.release();
+        res.status(500).json({ 
+            success: false, 
+            mensaje: "Error al eliminar persona", 
+            error: error.message 
+        });
     }
 };
-
 // 6. Obtener personas por tipo
 const obtenerPersonasPorTipo = async (req, res) => {
     try {

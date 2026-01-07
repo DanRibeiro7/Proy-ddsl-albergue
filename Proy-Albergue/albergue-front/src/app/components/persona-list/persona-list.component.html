@@ -1,20 +1,18 @@
 <div class="container-fluid px-4 mt-4">
-  
+
   <div class="row align-items-center mb-4">
     <div class="col-md-6">
       <h2 class="fw-bold text-dark"><i class="bi bi-people-fill me-2"></i>Directorio de Huéspedes</h2>
       <p class="text-muted fs-6">Gestión general de ciudadanos registrados en el sistema.</p>
     </div>
-    
+
     <div class="col-md-6 d-flex gap-2 justify-content-md-end align-items-center">
       <div class="input-group shadow-sm" style="max-width: 350px;">
         <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
-        <input type="text" class="form-control border-start-0 ps-0" 
-               placeholder="Buscar por DNI o Nombre..." 
-               [(ngModel)]="textoBusqueda" 
-               (keyup)="filtrar()">
+        <input type="text" class="form-control border-start-0 ps-0" placeholder="Buscar por DNI o Nombre..."
+          [(ngModel)]="textoBusqueda" (keyup)="filtrar()">
       </div>
-      
+
       <button class="btn btn-primary btn-lg shadow-sm" routerLink="/personas/nuevo">
         <i class="bi bi-plus-lg"></i> Nuevo
       </button>
@@ -24,11 +22,13 @@
   <div class="card shadow border-0">
     <div class="card-body p-0">
       <div class="table-responsive">
-        
+
         <table class="table table-hover align-middle mb-0 table-striped">
           <thead class="bg-light">
             <tr class="text-uppercase text-secondary" style="font-size: 0.9rem; letter-spacing: 1px;">
-              <th class="ps-4 py-3">Nombre Completo</th>
+              <th class="ps-4 py-3" style="width: 50px;">ID</th>
+
+              <th>Nombre Completo</th>
               <th>DNI</th>
               <th>Procedencia</th>
               <th>Teléfono</th>
@@ -38,12 +38,17 @@
           </thead>
           <tbody>
             <tr *ngFor="let p of obtenerDatosPaginados()">
-              
-              <td class="ps-4 py-3">
+
+              <td class="ps-4">
+                <span class="fw-bold text-dark">{{ p.idpersona }}</span>
+              </td>
+
+              <td>
                 <div class="d-flex align-items-center">
-                  <div class="avatar-circle me-3 d-flex justify-content-center align-items-center fw-bold text-white shadow-sm"
-                       [ngClass]="p.idtipo_persona === 2 ? 'bg-success' : 'bg-primary'" 
-                       style="width: 45px; height: 45px; border-radius: 50%; font-size: 1.2rem;">
+                  <div
+                    class="avatar-circle me-3 d-flex justify-content-center align-items-center fw-bold text-white shadow-sm"
+                    [ngClass]="p.idtipo_persona === 2 ? 'bg-success' : 'bg-primary'"
+                    style="width: 45px; height: 45px; border-radius: 50%; font-size: 1.2rem;">
                     {{ p.nombres.charAt(0) }}
                   </div>
                   <div>
@@ -53,51 +58,41 @@
                   </div>
                 </div>
               </td>
-              
+
               <td><span class="fw-bold fs-6 text-dark">{{ p.dni }}</span></td>
-              
+
               <td class="fs-6 text-secondary">{{ p.procedencia || '-' }}</td>
-              
+
               <td class="fs-6 text-secondary">{{ p.telefono || '-' }}</td>
-              
+
               <td>
-                <span class="badge rounded-pill px-3 py-2" 
-                      [ngClass]="p.idtipo_persona === 2 ? 'bg-success-subtle text-success' : 'bg-primary-subtle text-primary'">
+                <span class="badge rounded-pill px-3 py-2"
+                  [ngClass]="p.idtipo_persona === 2 ? 'bg-success-subtle text-success' : 'bg-primary-subtle text-primary'">
                   {{ p.idtipo_persona === 2 ? 'ESTUDIANTE' : 'PACIENTE' }}
                 </span>
               </td>
-              
+
               <td class="text-end pe-4">
-  <div class="btn-group shadow-sm">
-    
-    <button class="btn btn-outline-secondary px-3" 
-            (click)="verFicha(p)" 
-            data-bs-toggle="modal" 
-            data-bs-target="#modalFicha" 
-            title="Ver Ficha">
-      <i class="bi bi-eye fs-5"></i>
-    </button>
+                <div class="btn-group shadow-sm">
+                  <button class="btn btn-outline-secondary px-3" (click)="verFicha(p)" data-bs-toggle="modal"
+                    data-bs-target="#modalFicha" title="Ver Ficha">
+                    <i class="bi bi-eye fs-5"></i>
+                  </button>
 
-    <button class="btn btn-outline-success px-3" 
-            (click)="irAHospedar(p.dni)" 
-            title="Hospedar">
-      <i class="bi bi-box-arrow-in-right fs-5"></i>
-    </button>
+                  <button class="btn btn-outline-success px-3" (click)="irAHospedar(p.dni)" title="Hospedar">
+                    <i class="bi bi-box-arrow-in-right fs-5"></i>
+                  </button>
 
-    <button class="btn btn-outline-primary px-3" 
-            [routerLink]="['/personas/editar', p.idpersona]" 
-            title="Editar">
-      <i class="bi bi-pencil fs-5"></i>
-    </button>
-    
-    <button class="btn btn-outline-danger px-3" 
-            (click)="eliminarPersona(p.idpersona!)" 
-            title="Eliminar">
-      <i class="bi bi-trash fs-5"></i>
-    </button>
+                  <button class="btn btn-outline-primary px-3" [routerLink]="['/personas/editar', p.idpersona]"
+                    title="Editar">
+                    <i class="bi bi-pencil fs-5"></i>
+                  </button>
 
-  </div>
-</td>
+                  <button class="btn btn-outline-danger px-3" (click)="eliminarPersona(p.idpersona!)" title="Eliminar">
+                    <i class="bi bi-trash fs-5"></i>
+                  </button>
+                </div>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -114,10 +109,12 @@
 
       </div>
 
-      <div class="card-footer bg-white border-top-0 d-flex justify-content-between align-items-center py-3 px-4" *ngIf="listaFiltrada.length > 0">
+      <div class="card-footer bg-white border-top-0 d-flex justify-content-between align-items-center py-3 px-4"
+        *ngIf="listaFiltrada.length > 0">
         <span class="text-muted small">
-          Mostrando {{ ((paginaActual - 1) * itemsPorPagina) + 1 }} a 
-          {{ (paginaActual * itemsPorPagina) > listaFiltrada.length ? listaFiltrada.length : (paginaActual * itemsPorPagina) }} 
+          Mostrando {{ ((paginaActual - 1) * itemsPorPagina) + 1 }} a
+          {{ (paginaActual * itemsPorPagina) > listaFiltrada.length ? listaFiltrada.length : (paginaActual *
+          itemsPorPagina) }}
           de {{ listaFiltrada.length }} registros
         </span>
 
@@ -147,9 +144,9 @@
 <div class="modal fade" id="modalFicha" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content border-0 shadow">
-      
-      <div class="modal-header text-white" 
-           [ngClass]="personaSeleccionada?.idtipo_persona === 2 ? 'bg-success' : 'bg-primary'">
+
+      <div class="modal-header text-white"
+        [ngClass]="personaSeleccionada?.idtipo_persona === 2 ? 'bg-success' : 'bg-primary'">
         <h5 class="modal-title fw-bold">
           <i class="bi bi-person-badge me-2"></i>Ficha de Huésped
         </h5>
@@ -158,87 +155,91 @@
 
       <div class="modal-body p-4" *ngIf="personaSeleccionada">
         <div class="text-center mb-4">
-          <div class="avatar-circle mx-auto mb-2 fw-bold fs-2 text-white d-flex align-items-center justify-content-center shadow"
-               [ngClass]="personaSeleccionada.idtipo_persona === 2 ? 'bg-success' : 'bg-primary'"
-               style="width: 90px; height: 90px; border-radius: 50%;">
+          <div
+            class="avatar-circle mx-auto mb-2 fw-bold fs-2 text-white d-flex align-items-center justify-content-center shadow"
+            [ngClass]="personaSeleccionada.idtipo_persona === 2 ? 'bg-success' : 'bg-primary'"
+            style="width: 90px; height: 90px; border-radius: 50%;">
             {{ personaSeleccionada.nombres.charAt(0) }}
           </div>
           <h3 class="fw-bold mb-0 text-dark">{{ personaSeleccionada.nombres }} {{ personaSeleccionada.apellidos }}</h3>
-          <span class="badge rounded-pill mt-2 px-3 py-2 fs-6" 
-                [ngClass]="personaSeleccionada.idtipo_persona === 2 ? 'bg-success' : 'bg-primary'">
+          <span class="badge rounded-pill mt-2 px-3 py-2 fs-6"
+            [ngClass]="personaSeleccionada.idtipo_persona === 2 ? 'bg-success' : 'bg-primary'">
             {{ personaSeleccionada.idtipo_persona === 2 ? 'Estudiante' : 'Paciente' }}
           </span>
         </div>
 
         <div class="row g-4">
-    
-    <div class="col-6">
-        <small class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">DNI / Documento</small>
-        <div class="fs-5 fw-bold text-dark">{{ personaSeleccionada.dni }}</div>
-    </div>
-    <div class="col-6">
-        <small class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">Teléfono</small>
-        <div class="fs-5 text-dark">{{ personaSeleccionada.telefono || 'No registrado' }}</div>
-    </div>
-    <div class="col-12">
-        <small class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">Procedencia</small>
-        <div class="fs-5 text-dark">
-            <i class="bi bi-geo-alt-fill text-danger me-1"></i> {{ personaSeleccionada.procedencia || 'No registrada' }}
-        </div>
-    </div>
-    
-    <div class="col-12" *ngIf="personaSeleccionada.idtipo_persona === 2">
-        <div class="bg-success bg-opacity-10 p-3 rounded border border-success-subtle">
-            <h6 class="text-success fw-bold mb-3 border-bottom border-success-subtle pb-2">
+
+          <div class="col-6">
+            <small class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">DNI / Documento</small>
+            <div class="fs-5 fw-bold text-dark">{{ personaSeleccionada.dni }}</div>
+          </div>
+          <div class="col-6">
+            <small class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">Teléfono</small>
+            <div class="fs-5 text-dark">{{ personaSeleccionada.telefono || 'No registrado' }}</div>
+          </div>
+          <div class="col-12">
+            <small class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">Procedencia</small>
+            <div class="fs-5 text-dark">
+              <i class="bi bi-geo-alt-fill text-danger me-1"></i> {{ personaSeleccionada.procedencia || 'No registrada'
+              }}
+            </div>
+          </div>
+
+          <div class="col-12" *ngIf="personaSeleccionada.idtipo_persona === 2">
+            <div class="bg-success bg-opacity-10 p-3 rounded border border-success-subtle">
+              <h6 class="text-success fw-bold mb-3 border-bottom border-success-subtle pb-2">
                 <i class="bi bi-mortarboard-fill me-2"></i>DATOS ACADÉMICOS
-            </h6>
-            <div class="row g-3">
+              </h6>
+              <div class="row g-3">
                 <div class="col-12">
-                    <small class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">Institución Educativa</small>
-                    <div class="text-dark fw-bold fs-6">{{ personaSeleccionada.institucion || 'No especificada' }}</div>
+                  <small class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">Institución
+                    Educativa</small>
+                  <div class="text-dark fw-bold fs-6">{{ personaSeleccionada.institucion || 'No especificada' }}</div>
                 </div>
                 <div class="col-8">
-                    <small class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">Carrera</small>
-                    <div class="text-dark">{{ personaSeleccionada.carrera || '-' }}</div>
+                  <small class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">Carrera</small>
+                  <div class="text-dark">{{ personaSeleccionada.carrera || '-' }}</div>
                 </div>
                 <div class="col-4">
-                    <small class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">Ciclo</small>
-                    <div class="text-dark fw-bold">{{ personaSeleccionada.ciclo_actual || '-' }}</div>
+                  <small class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">Ciclo</small>
+                  <div class="text-dark fw-bold">{{ personaSeleccionada.ciclo_actual || '-' }}</div>
                 </div>
+              </div>
             </div>
-        </div>
-    </div>
+          </div>
 
-    <div class="col-12" *ngIf="personaSeleccionada.idtipo_persona === 1">
-        <div class="bg-primary bg-opacity-10 p-3 rounded border border-primary-subtle">
-            <h6 class="text-primary fw-bold mb-3 border-bottom border-primary-subtle pb-2">
+          <div class="col-12" *ngIf="personaSeleccionada.idtipo_persona === 1">
+            <div class="bg-primary bg-opacity-10 p-3 rounded border border-primary-subtle">
+              <h6 class="text-primary fw-bold mb-3 border-bottom border-primary-subtle pb-2">
                 <i class="bi bi-hospital-fill me-2"></i>FICHA MÉDICA
-            </h6>
-            <div class="row g-3">
+              </h6>
+              <div class="row g-3">
                 <div class="col-12">
-                    <small class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">Diagnóstico / Motivo</small>
-                    <div class="text-dark fw-bold fs-6">{{ personaSeleccionada.diagnostico || 'No especificado' }}</div>
+                  <small class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">Diagnóstico /
+                    Motivo</small>
+                  <div class="text-dark fw-bold fs-6">{{ personaSeleccionada.diagnostico || 'No especificado' }}</div>
                 </div>
                 <div class="col-7">
-                    <small class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">Hospital Origen</small>
-                    <div class="text-dark">{{ personaSeleccionada.hospital_origen || '-' }}</div>
+                  <small class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">Hospital Origen</small>
+                  <div class="text-dark">{{ personaSeleccionada.hospital_origen || '-' }}</div>
                 </div>
                 <div class="col-5">
-                    <small class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">Código SIS</small>
-                    <div class="text-dark font-monospace bg-white px-2 rounded border">{{ personaSeleccionada.codigo_sis || 'S/N' }}</div>
+                  <small class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">Código SIS</small>
+                  <div class="text-dark font-monospace bg-white px-2 rounded border">{{ personaSeleccionada.codigo_sis
+                    || 'S/N' }}</div>
                 </div>
+              </div>
             </div>
-        </div>
-    </div>
+          </div>
 
-</div>
+        </div>
       </div>
 
       <div class="modal-footer border-0 bg-light">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-        <button type="button" class="btn btn-success" 
-                (click)="irAHospedar(personaSeleccionada?.dni || '')" 
-                data-bs-dismiss="modal">
+        <button type="button" class="btn btn-success" (click)="irAHospedar(personaSeleccionada?.dni || '')"
+          data-bs-dismiss="modal">
           <i class="bi bi-check-circle me-1"></i> Asignar Habitación
         </button>
       </div>

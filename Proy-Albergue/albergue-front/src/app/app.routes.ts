@@ -1,19 +1,27 @@
 import { Routes } from '@angular/router';
 
-// Componentes de Login y Layout
+// 1. Componentes Base (Login y Estructura)
 import { LoginComponent } from './components/login/login.component';
 import { LayoutComponent } from './components/layout/layout.component';
 
-// Componentes Principales
+// 2. Componentes Principales
 import { HabitacionListComponent } from './components/habitacion-list/habitacion-list.component';
+
+// Registros (Importamos Lista y Formulario por separado)
+import { RegistroListComponent } from './components/registro-list/registro-list.component';
 import { RegistroComponent } from './components/registro-form/registro-form.component';
+
+// Personas (Tus componentes de gestión de huéspedes)
+import { PersonaListComponent } from './components/persona-list/persona-list.component';
+import { PersonaFormComponent } from './components/persona-form/persona-form.component';
+
+// Usuarios
 import { UsuarioListComponent } from './components/usuario-list/usuario-list.component';
 
-// ✅ ÚNICO COMPONENTE DE REPORTES (EL NUEVO DASHBOARD)
-// Nota: Ajusta la ruta si creaste una carpeta extra, pero según tu imagen está aquí:
+// 3. NUEVO Dashboard de Reportes (La versión consolidada)
 import { ReporteDashboardComponent } from './components/reportes/reporte-dashboard.component';
 
-// Guards de Seguridad
+// Guards (Están importados, pero los usaremos comentados por ahora)
 import { AuthGuard } from './guards/auth.guard';
 import { AdminGuard } from './guards/admin.guard';
 
@@ -22,34 +30,41 @@ export const routes: Routes = [
   // 🔓 LOGIN (Pública)
   { path: 'login', component: LoginComponent },
 
-  // 🔐 ÁREA PRIVADA (Con Menú Lateral/Layout)
+  // 🔐 SISTEMA PRINCIPAL (Layout con Menú Lateral)
   {
     path: '',
     component: LayoutComponent,
-    canActivate: [AuthGuard], // Protege todas las rutas hijas
+    // canActivate: [AuthGuard], // <--- COMENTADO: Para que puedas desarrollar sin bloqueos
     children: [
       
-      // Rutas Principales
+      // === 1. HABITACIONES (Dashboard Principal) ===
       { path: 'habitaciones', component: HabitacionListComponent },
-      { path: 'registro', component: RegistroComponent },
 
-      // 👑 GESTIÓN DE USUARIOS (Solo Admin)
+      // === 2. REGISTROS (Flujo Correcto) ===
+      // Ruta para ver la TABLA (Historial)
+      { path: 'registro', component: RegistroListComponent }, 
+      // Ruta para el FORMULARIO (Nuevo Ingreso)
+      { path: 'registro/nuevo', component: RegistroComponent },
+
+      // === 3. PERSONAS (Huéspedes) ===
+      { path: 'personas', component: PersonaListComponent },          // Lista
+      { path: 'personas/nuevo', component: PersonaFormComponent },    // Crear
+      { path: 'personas/editar/:id', component: PersonaFormComponent }, // Editar
+        
+      // === 4. USUARIOS (Admin) ===
       {
         path: 'usuarios',
         component: UsuarioListComponent,
-        canActivate: [AdminGuard]
+        // canActivate: [AdminGuard] // <--- COMENTADO
       },
 
-      // 📊 REPORTES (DASHBOARD)
-      // Esta es la única ruta que necesitas ahora. 
-      // Al entrar a /reportes se verán las tarjetas y gráficas.
+      // === 5. REPORTES (Tu Nuevo Dashboard) ===
       { path: 'reportes', component: ReporteDashboardComponent },
 
-      // Redirección por defecto al entrar al sistema
+      // Redirección por defecto al entrar
       { path: '', redirectTo: 'habitaciones', pathMatch: 'full' }
     ]
   },
 
-  // ❌ RUTAS NO ENCONTRADAS (Redirigir al Login)
-  { path: '**', redirectTo: 'login' }
+  { path: '**', redirectTo: 'habitaciones' }
 ];
