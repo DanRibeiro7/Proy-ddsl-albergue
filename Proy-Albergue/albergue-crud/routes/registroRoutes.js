@@ -2,16 +2,13 @@ const express = require('express');
 const router = express.Router();
 
 const {
+    obtenerRegistros,
     registrarIngreso,
-    registrarSalida,
-    totalAlbergados
+    registrarSalida
 } = require('../controllers/registroController');
 
-// POST
-router.post('/ingreso', registrarIngreso);
-router.post('/salida', registrarSalida);
-
-// GET
-router.get('/total', totalAlbergados);
+router.get('/', obtenerRegistros); 
+router.post('/', registrarIngreso);
+router.put('/salida', registrarSalida);
 
 module.exports = router;

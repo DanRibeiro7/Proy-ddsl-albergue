@@ -1,0 +1,71 @@
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="fw-bold text-dark"><i class="bi bi-journal-text me-2"></i>Historial de Registros</h2>
+      <p class="text-muted">Listado general de ingresos y salidas.</p>
+    </div>
+    
+    <button class="btn btn-primary" routerLink="/registro/nuevo">
+      <i class="bi bi-plus-lg"></i> Nuevo Registro
+    </button>
+  </div>
+
+  <div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="bg-light">
+            <tr>
+              <th class="ps-4">Huésped</th>
+              <th>Habitación</th>
+              <th>Fecha Ingreso</th>
+              <th>Estado</th>
+              <th class="text-end pe-4">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let r of listaRegistros">
+              
+              <td class="ps-4">
+                <div class="fw-bold">{{ r.nombre_huesped }}</div>
+                <small class="text-muted">DNI: {{ r.dni }}</small>
+              </td>
+
+              <td>
+                <span class="badge bg-light text-dark border">
+                  Hab. {{ r.numero_habitacion }}
+                </span>
+                <small class="d-block text-muted">Piso {{ r.piso }}</small>
+              </td>
+
+              <td>
+                <i class="bi bi-calendar-event me-1 text-muted"></i>
+                {{ r.fecha_ingreso | date:'dd/MM/yyyy HH:mm a' }}
+              </td>
+
+              <td>
+                <span class="badge rounded-pill"
+                  [ngClass]="{
+                    'bg-success': r.estado === 'ACTIVO',
+                    'bg-secondary': r.estado === 'FINALIZADO'
+                  }">
+                  {{ r.estado }}
+                </span>
+              </td>
+
+              <td class="text-end pe-4">
+                <button class="btn btn-sm btn-outline-primary me-2" title="Ver detalles">
+                  <i class="bi bi-eye"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div *ngIf="!loading && listaRegistros.length === 0" class="text-center py-5">
+          <p class="text-muted">No hay registros encontrados.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

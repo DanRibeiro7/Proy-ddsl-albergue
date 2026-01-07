@@ -11,12 +11,12 @@
           <h5 class="m-0 text-primary"><i class="bi bi-person-vcard"></i> Datos del Huésped</h5>
         </div>
         <div class="card-body">
-          
+
           <div class="mb-3">
             <label class="form-label">DNI / Documento</label>
             <div class="input-group">
-              <input type="text" class="form-control" [(ngModel)]="persona.dni" 
-                     (blur)="buscarDni()" placeholder="Ingrese 8 dígitos y presione Tab" maxlength="8">
+              <input type="text" class="form-control" [(ngModel)]="persona.dni" (blur)="buscarDni()"
+                placeholder="Ingrese 8 dígitos y presione Tab" maxlength="8">
               <button class="btn btn-outline-secondary" type="button" (click)="buscarDni()">
                 <i class="bi bi-search"></i>
               </button>
@@ -37,9 +37,52 @@
 
           <div class="mb-3">
             <label class="form-label">Procedencia / Comunidad</label>
-            <input type="text" class="form-control" [(ngModel)]="persona.procedencia" placeholder="Ej: Comunidad Nativa X">
+            <input type="text" class="form-control" [(ngModel)]="persona.procedencia"
+              placeholder="Ej: Comunidad Nativa X">
+          </div>
+          <div *ngIf="persona.idtipo_persona === 1" class="card bg-info bg-opacity-10 border-info mb-3">
+            <div class="card-body">
+              <h6 class="text-info fw-bold"><i class="bi bi-hospital"></i> Ficha Médica</h6>
+
+              <div class="mb-2">
+                <label class="form-label small">Diagnóstico / Motivo</label>
+                <input type="text" class="form-control form-control-sm" [(ngModel)]="datosPaciente.diagnostico"
+                  placeholder="Ej: Tratamiento oncológico">
+              </div>
+              <div class="row">
+                <div class="col-6 mb-2">
+                  <label class="form-label small">Centro de Salud de Origen</label>
+                  <input type="text" class="form-control form-control-sm" [(ngModel)]="datosPaciente.hospital">
+                </div>
+                <div class="col-6 mb-2">
+                  <label class="form-label small">Código SIS</label>
+                  <input type="text" class="form-control form-control-sm" [(ngModel)]="datosPaciente.sis">
+                </div>
+              </div>
+            </div>
           </div>
 
+          <div *ngIf="persona.idtipo_persona === 2" class="card bg-success bg-opacity-10 border-success mb-3">
+            <div class="card-body">
+              <h6 class="text-success fw-bold"><i class="bi bi-mortarboard"></i> Ficha Académica</h6>
+
+              <div class="mb-2">
+                <label class="form-label small">Institución Educativa</label>
+                <input type="text" class="form-control form-control-sm" [(ngModel)]="datosEstudiante.institucion"
+                  placeholder="Ej: UNIA, Instituto Suiza...">
+              </div>
+              <div class="row">
+                <div class="col-8 mb-2">
+                  <label class="form-label small">Carrera</label>
+                  <input type="text" class="form-control form-control-sm" [(ngModel)]="datosEstudiante.carrera">
+                </div>
+                <div class="col-4 mb-2">
+                  <label class="form-label small">Ciclo</label>
+                  <input type="text" class="form-control form-control-sm" [(ngModel)]="datosEstudiante.ciclo">
+                </div>
+              </div>
+            </div>
+          </div>
           <div class="mb-3">
             <label class="form-label">Teléfono (Opcional)</label>
             <input type="text" class="form-control" [(ngModel)]="persona.telefono">
@@ -55,37 +98,38 @@
           <h5 class="m-0"><i class="bi bi-calendar-check"></i> Detalle del Alojamiento</h5>
         </div>
         <div class="card-body">
-          
+
           <div class="mb-3">
             <label class="form-label fw-bold">Habitación</label>
-            
+
             <div *ngIf="habitacionId > 0">
               <div class="input-group">
                 <span class="input-group-text bg-success text-white fw-bold">#{{ habitacionId }}</span>
                 <input type="text" class="form-control" [value]="tipoHabitacion" readonly>
                 <button class="btn btn-outline-secondary" (click)="limpiarSeleccion()" title="Cambiar habitación">
-                    <i class="bi bi-x-lg"></i>
+                  <i class="bi bi-x-lg"></i>
                 </button>
               </div>
             </div>
 
             <div *ngIf="habitacionId === 0">
-               <select class="form-select" [(ngModel)]="seleccionManual" (change)="seleccionarHabitacionManual()">
-                  <option value="" disabled selected>-- Seleccione Habitación --</option>
-                  <optgroup label="Estudiantes">
-                    <option *ngFor="let h of habitacionesEstudiantes" [value]="h.idhabitacion">
-                        Hab. {{h.numero_habitacion}} (Piso {{h.piso}})
-                    </option>
-                  </optgroup>
-                  <optgroup label="Pacientes">
-                    <option *ngFor="let h of habitacionesPacientes" [value]="h.idhabitacion">
-                        Hab. {{h.numero_habitacion}} (Piso {{h.piso}})
-                    </option>
-                  </optgroup>
-               </select>
-               <small class="text-muted" *ngIf="habitacionesEstudiantes.length === 0 && habitacionesPacientes.length === 0">
-                 Cargando habitaciones disponibles...
-               </small>
+              <select class="form-select" [(ngModel)]="seleccionManual" (change)="seleccionarHabitacionManual()">
+                <option value="" disabled selected>-- Seleccione Habitación --</option>
+                <optgroup label="Estudiantes">
+                  <option *ngFor="let h of habitacionesEstudiantes" [value]="h.idhabitacion">
+                    Hab. {{h.numero_habitacion}} (Piso {{h.piso}})
+                  </option>
+                </optgroup>
+                <optgroup label="Pacientes">
+                  <option *ngFor="let h of habitacionesPacientes" [value]="h.idhabitacion">
+                    Hab. {{h.numero_habitacion}} (Piso {{h.piso}})
+                  </option>
+                </optgroup>
+              </select>
+              <small class="text-muted"
+                *ngIf="habitacionesEstudiantes.length === 0 && habitacionesPacientes.length === 0">
+                Cargando habitaciones disponibles...
+              </small>
             </div>
           </div>
 

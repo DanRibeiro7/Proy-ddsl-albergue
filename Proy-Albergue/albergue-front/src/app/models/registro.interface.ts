@@ -1,4 +1,3 @@
-
 export interface Persona {
     idpersona?: number;
     dni: string;
@@ -6,7 +5,19 @@ export interface Persona {
     apellidos: string;
     telefono?: string;
     procedencia?: string;
-    idtipo_persona?: number; // 1=PACIENTE, 2=ESTUDIANTE, 3=ACOMPAÑANTE
+    idtipo_persona?: number;
+    
+    // Agregamos los objetos opcionales para enviar al backend
+    datosPaciente?: {
+        diagnostico: string;
+        hospital: string;
+        sis: string;
+    };
+    datosEstudiante?: {
+        institucion: string;
+        carrera: string;
+        ciclo: string;
+    };
 }
 
 export interface Registro {

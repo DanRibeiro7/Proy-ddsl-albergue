@@ -21,8 +21,9 @@ export class RegistroComponent implements OnInit {
   habitacionId: number = 0;
   tipoHabitacion: string = '';
   seleccionManual: string = "";
-
-  // Listas para el dropdown (LO QUE NECESITA TU HTML)
+  datosPaciente = { diagnostico: '', hospital: '', sis: '' };
+  datosEstudiante = { institucion: '', carrera: '', ciclo: '' };
+  
   habitacionesEstudiantes: Habitacion[] = [];
   habitacionesPacientes: Habitacion[] = [];
 
@@ -45,27 +46,32 @@ export class RegistroComponent implements OnInit {
 
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
-      const idParam = params['idHabitacion'];
       
+      // 1. Si viene desde el mapa de habitaciones (ya trae ID habitación)
+      const idParam = params['idHabitacion'];
       if (idParam) {
-        // CASO A: Viene desde el mapa de habitaciones (Pre-seleccionado)
         this.habitacionId = +idParam;
         this.tipoHabitacion = params['tipo'];
-      } else {
-        // CASO B: Viene desde el menú lateral (Manual)
-        this.cargarHabitacionesDisponibles();
+      } else { 
+        // Si no trae habitación, cargamos la lista para que elija manual
+        this.cargarHabitacionesDisponibles(); 
+      }
+
+      // 2. Si viene desde "Nuevo Huésped" (ya trae DNI)
+      const dniParam = params['dni'];
+      if (dniParam) {
+        this.persona.dni = dniParam;
+        // Buscamos automáticamente los datos de la persona
+        this.buscarDni(); 
       }
     });
   }
 
-  // Carga las habitaciones para llenar los <optgroup> de tu select
   cargarHabitacionesDisponibles() {
     this.habitacionService.obtenerHabitaciones().subscribe({
       next: (res: any) => {
         if (res.success && Array.isArray(res.data)) {
           const todas = res.data as Habitacion[];
-          
-          // Filtramos y llenamos las listas que usa tu HTML
           this.habitacionesEstudiantes = todas.filter(h => h.tipo === 'ESTUDIANTE' && h.estado === 'DISPONIBLE');
           this.habitacionesPacientes = todas.filter(h => h.tipo === 'PACIENTE' && h.estado === 'DISPONIBLE');
         }
@@ -73,27 +79,20 @@ export class RegistroComponent implements OnInit {
     });
   }
 
-  // Se ejecuta cuando el usuario elige una opción del dropdown
   seleccionarHabitacionManual() {
     const idSeleccionado = +this.seleccionManual;
-    
-    // Buscamos en ambas listas para encontrar los datos completos
     const hab = [...this.habitacionesEstudiantes, ...this.habitacionesPacientes]
                 .find(h => h.idhabitacion === idSeleccionado);
-    
     if (hab) {
       this.habitacionId = hab.idhabitacion!;
-      this.tipoHabitacion = hab.tipo!; // 'ESTUDIANTE' o 'PACIENTE'
+      this.tipoHabitacion = hab.tipo!;
     }
   }
 
-  // Botón "X" para cancelar selección y volver al dropdown
   limpiarSeleccion() {
     this.habitacionId = 0;
     this.tipoHabitacion = '';
     this.seleccionManual = "";
-    
-    // Si venía del mapa, ahora necesitamos cargar la lista
     if (this.habitacionesEstudiantes.length === 0) {
         this.cargarHabitacionesDisponibles();
     }
@@ -105,6 +104,7 @@ export class RegistroComponent implements OnInit {
       this.personaService.buscarPorDni(this.persona.dni).subscribe({
         next: (res) => {
           if (res.success && res.data) {
+            // Asignamos la data encontrada al formulario
             this.persona = res.data as any;
           }
           this.isLoading = false;
@@ -114,71 +114,70 @@ export class RegistroComponent implements OnInit {
     }
   }
 
- guardarRegistro() {
-  // Validaciones básicas
-  if (this.habitacionId === 0) {
-    alert('Debe seleccionar una habitación');
-    return;
-  }
-  if (!this.persona.nombres || !this.persona.dni) {
-    alert('Complete los datos obligatorios (DNI y Nombres)');
-    return;
-  }
-
-  this.isLoading = true;
-  this.persona.idtipo_persona = this.tipoHabitacion === 'ESTUDIANTE' ? 2 : 1;
-
-  console.log('Enviando persona al backend:', this.persona); // <--- MIRA ESTO EN CONSOLA
-
-  // 1. Guardar Persona
-  this.personaService.crearPersona(this.persona).subscribe({
-    next: (resPer) => {
-      console.log('Respuesta Persona:', resPer); // <--- LOG DE ÉXITO
-
-      if (resPer.success) {
-        // Obtenemos el ID, ya sea nuevo (insertId) o existente (idpersona)
-        const idPersona = resPer.data.idpersona || resPer.data.insertId;
-
-        // 2. Guardar Registro
-        const nuevoRegistro: Registro = {
-          idpersona: idPersona,
-          idhabitacion: this.habitacionId,
-          fecha_ingreso: this.fechaIngreso,
-          // fecha_salida: NO LA MANDAMOS PORQUE ES OPCIONAL
-          estado: 'ACTIVO'
-        };
-
-        this.registroService.crearRegistro(nuevoRegistro).subscribe({
-          next: (resReg) => {
-            console.log('Respuesta Registro:', resReg);
-            if (resReg.success) {
-              alert('¡Hospedaje registrado con éxito!');
-              this.router.navigate(['/habitaciones']);
-            } else {
-              alert('Error del servidor: ' + resReg.message);
-            }
-            this.isLoading = false;
-          },
-          error: (err) => {
-            console.error('ERROR REGISTRO:', err); // <--- VER ERROR REAL
-            alert('Fallo al crear el hospedaje: ' + (err.error?.mensaje || err.message));
-            this.isLoading = false;
-          }
-        });
-
-      } else {
-         alert('Error al guardar persona: ' + resPer.message);
-         this.isLoading = false;
-      }
-    },
-    error: (err) => {
-      console.error('ERROR PERSONA:', err); // <--- AQUÍ ESTÁ TU PROBLEMA
-      // Mostramos el error real en lugar de "Error de conexión"
-      alert('Error conectando con el servidor: ' + (err.error?.mensaje || err.message || err.statusText));
-      this.isLoading = false;
+  guardarRegistro() {
+    // Validaciones
+    if (this.habitacionId === 0) {
+      alert('Debe seleccionar una habitación');
+      return;
     }
-  });
-}
+    if (!this.persona.nombres || !this.persona.dni) {
+      alert('Complete los datos obligatorios (DNI y Nombres)');
+      return;
+    }
+
+    // Preparar datos extra según tipo
+    if (this.persona.idtipo_persona === 1) {
+       this.persona.datosPaciente = this.datosPaciente;
+    } else if (this.persona.idtipo_persona === 2) {
+       this.persona.datosEstudiante = this.datosEstudiante;
+    }
+    
+    this.isLoading = true;
+    this.persona.idtipo_persona = this.tipoHabitacion === 'ESTUDIANTE' ? 2 : 1;
+
+    // 1. Intentamos crear/actualizar la persona primero
+    this.personaService.crearPersona(this.persona).subscribe({
+      next: (resPer) => {
+        if (resPer.success) {
+          const idPersona = resPer.data.idpersona || resPer.data.insertId;
+
+          // 2. Crear el registro de hospedaje
+          const nuevoRegistro: Registro = {
+            idpersona: idPersona,
+            idhabitacion: this.habitacionId,
+            fecha_ingreso: this.fechaIngreso,
+            estado: 'ACTIVO'
+          };
+
+          this.registroService.crearRegistro(nuevoRegistro).subscribe({
+            next: (resReg) => {
+              if (resReg.success) {
+                alert('¡Hospedaje registrado con éxito!');
+                this.router.navigate(['/habitaciones']);
+              } else {
+                alert('Error al registrar hospedaje: ' + resReg.message);
+              }
+              this.isLoading = false;
+            },
+            error: (err) => {
+              console.error(err);
+              alert('Fallo al crear el hospedaje');
+              this.isLoading = false;
+            }
+          });
+
+        } else {
+           alert('Error al procesar persona: ' + resPer.message);
+           this.isLoading = false;
+        }
+      },
+      error: (err) => {
+        console.error(err);
+        alert('Error de conexión');
+        this.isLoading = false;
+      }
+    });
+  }
 
   cancelar() {
     this.router.navigate(['/habitaciones']);

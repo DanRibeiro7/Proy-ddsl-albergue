@@ -1,11 +1,44 @@
 const db = require('../config/database');
 
-// Registrar ingreso
+const obtenerRegistros = async (req, res) => {
+    try {
+        const sql = `
+            SELECT 
+                r.idregistro,
+                r.fecha_ingreso,
+                r.fecha_salida,
+                r.estado,
+                CONCAT(p.nombres, ' ', p.apellidos) as nombre_huesped,
+                p.dni,
+                h.numero_habitacion,
+                h.piso
+            FROM registro r
+            INNER JOIN persona p ON r.idpersona = p.idpersona
+            INNER JOIN habitacion h ON r.idhabitacion = h.idhabitacion
+            ORDER BY r.fecha_ingreso DESC
+        `;
+
+        const [registros] = await db.query(sql);
+
+        res.json({
+            success: true,
+            data: registros
+        });
+
+    } catch (error) {
+        res.status(500).json({ 
+            success: false, 
+            mensaje: 'Error al obtener registros',
+            error: error.message 
+        });
+    }
+};
+
 const registrarIngreso = async (req, res) => {
     try {
         const { idpersona, idhabitacion, fecha_ingreso } = req.body;
 
-        // capacidad
+        // Validar capacidad
         const [[hab]] = await db.query(
             'SELECT capacidad FROM habitacion WHERE idhabitacion = ?',
             [idhabitacion]
@@ -25,12 +58,14 @@ const registrarIngreso = async (req, res) => {
             });
         }
 
+        // Insertar registro
         await db.query(
-            `INSERT INTO registro(idpersona, idhabitacion, fecha_ingreso)
-             VALUES (?, ?, ?)`,
+            `INSERT INTO registro(idpersona, idhabitacion, fecha_ingreso, estado)
+             VALUES (?, ?, ?, 'ACTIVO')`,
             [idpersona, idhabitacion, fecha_ingreso]
         );
 
+        // Actualizar estado de habitación a OCUPADA
         await db.query(
             `UPDATE habitacion SET estado='OCUPADA'
              WHERE idhabitacion=?`,
@@ -61,6 +96,10 @@ const registrarSalida = async (req, res) => {
             [idregistro]
         );
 
+        if (!registro) {
+             return res.status(404).json({ success: false, mensaje: 'Registro no encontrado' });
+        }
+
         await db.query(
             `UPDATE registro
              SET fecha_salida=?, estado='FINALIZADO'
@@ -68,6 +107,7 @@ const registrarSalida = async (req, res) => {
             [fecha_salida, idregistro]
         );
 
+        // Verificar si quedan personas en la habitación
         const [[restantes]] = await db.query(
             `SELECT COUNT(*) total
              FROM registro
@@ -75,6 +115,7 @@ const registrarSalida = async (req, res) => {
             [registro.idhabitacion]
         );
 
+        // Si ya no queda nadie, liberamos la habitación
         if (restantes.total === 0) {
             await db.query(
                 `UPDATE habitacion SET estado='DISPONIBLE'
@@ -119,6 +160,7 @@ const totalAlbergados = async (req, res) => {
 };
 
 module.exports = {
+    obtenerRegistros, 
     registrarIngreso,
     registrarSalida,
     totalAlbergados

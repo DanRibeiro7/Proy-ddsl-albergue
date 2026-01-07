@@ -1,11 +1,21 @@
 const db = require('../config/database');
 
-// Obtener todas las habitaciones
+// Obtener todas las habitaciones (Con datos del huésped si está ocupada)
 const obtenerHabitaciones = async (req, res) => {
     try {
-        const [habitaciones] = await db.query(
-            'SELECT * FROM habitacion ORDER BY piso, numero_habitacion'
-        );
+        // CAMBIO PRINCIPAL: Agregamos los JOINs y seleccionamos nombre y fecha
+        const sql = `
+            SELECT 
+                h.*, 
+                CONCAT(p.nombres, ' ', p.apellidos) AS nombre_huesped, 
+                r.fecha_ingreso 
+            FROM habitacion h
+            LEFT JOIN registro r ON h.idhabitacion = r.idhabitacion AND r.estado = 'ACTIVO'
+            LEFT JOIN persona p ON r.idpersona = p.idpersona
+            ORDER BY h.piso, h.numero_habitacion
+        `;
+
+        const [habitaciones] = await db.query(sql);
 
         res.json({
             success: true,
@@ -21,7 +31,6 @@ const obtenerHabitaciones = async (req, res) => {
         });
     }
 };
-
 // Obtener habitación por ID
 const obtenerHabitacionPorId = async (req, res) => {
     try {

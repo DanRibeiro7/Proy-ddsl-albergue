@@ -18,7 +18,20 @@
   box-shadow: 0 5px 10px rgba(0,0,0,0.1);
   z-index: 10;
 }
+.room-card {
+  /* ... tus estilos actuales ... */
+  min-height: 120px; /* Dale un poco más de altura para que quepan los datos */
+  display: flex;
+  flex-direction: column;
+}
 
+.text-truncate {
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
 /* --- ESTADOS --- */
 
 /* DISPONIBLE (Estilo minimalista verde) */

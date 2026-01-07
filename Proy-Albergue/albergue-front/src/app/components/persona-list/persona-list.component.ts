@@ -1,13 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common'; 
-import { RouterLink } from '@angular/router'; // <--- OBLIGATORIO PARA QUE FUNCIONEN LOS BOTONES
+import { RouterLink, Router } from '@angular/router'; // <--- Importar Router
 import { PersonaService } from '../../services/persona.service';
 import { Persona } from '../../models/registro.interface';
 
 @Component({
   selector: 'app-persona-list',
   standalone: true,
-  imports: [CommonModule, RouterLink], // <--- AGREGAR RouterLink AQUÍ
+  imports: [CommonModule, RouterLink], 
   templateUrl: './persona-list.component.html',
   styleUrls: ['./persona-list.component.css']
 })
@@ -15,11 +15,24 @@ export class PersonaListComponent implements OnInit {
 
   listaPersonas: Persona[] = [];
   loading = true;
-
-  constructor(private personaService: PersonaService) {}
+  personaSeleccionada: Persona | null = null;
+  
+  // CORRECCIÓN AQUÍ: Inyectar Router correctamente
+  constructor(
+    private personaService: PersonaService,
+    private router: Router 
+  ) {}
 
   ngOnInit(): void {
     this.cargarPersonas();
+  }
+
+  verFicha(persona: Persona) {
+    this.personaSeleccionada = persona;
+  }
+
+  irAHospedar(dni: string) {
+    this.router.navigate(['/registro'], { queryParams: { dni: dni } });
   }
 
   cargarPersonas() {
@@ -44,7 +57,7 @@ export class PersonaListComponent implements OnInit {
       this.personaService.eliminarPersona(id).subscribe({ 
         next: (res: any) => { 
           alert('Persona eliminada correctamente');
-          this.cargarPersonas(); // Recargamos la lista
+          this.cargarPersonas(); 
         },
         error: (err) => alert('Error al eliminar: ' + (err.error?.mensaje || err.message))
       });

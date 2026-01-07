@@ -9,7 +9,9 @@ export class RegistroService {
   private apiUrl = `${environment.apiUrl}/registros`;
 
   constructor(private http: HttpClient) { }
-
+  obtenerRegistros(): Observable<any> {
+    return this.http.get<any>(this.apiUrl);
+  }
   // Guardar el ingreso
   crearRegistro(registro: Registro): Observable<ApiResponse> {
     // CORRECCIÓN: Agregamos '/ingreso' para coincidir con el backend
