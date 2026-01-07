@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms'; // Importar NgForm
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { PersonaService } from '../../services/persona.service';
 import { Persona } from '../../models/registro.interface';
@@ -8,7 +8,7 @@ import { Persona } from '../../models/registro.interface';
 @Component({
   selector: 'app-persona-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink], 
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './persona-form.component.html',
   styleUrls: ['./persona-form.component.css']
 })
@@ -27,7 +27,7 @@ export class PersonaFormComponent implements OnInit {
     private personaService: PersonaService,
     private router: Router,
     private route: ActivatedRoute
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.route.params.subscribe(params => {
@@ -60,13 +60,19 @@ export class PersonaFormComponent implements OnInit {
     });
   }
 
-  // Lógica principal unificada
-  guardar(irAHospedar: boolean) {
-    
-    // Validación manual simple
-    if (!this.persona.dni || !this.persona.nombres || !this.persona.apellidos) {
-      alert('Por favor complete DNI, Nombres y Apellidos');
-      return;
+  validarSoloNumeros(event: any) {
+    const input = event.target;
+
+    input.value = input.value.replace(/[^0-9]/g, '');
+  }
+  guardar(form: NgForm, irAHospedar: boolean) {
+
+    if (form.invalid) {
+
+      Object.values(form.controls).forEach(control => {
+        control.markAsTouched();
+      });
+      return; // Detenemos la ejecución
     }
 
     this.isLoading = true;
@@ -76,7 +82,7 @@ export class PersonaFormComponent implements OnInit {
       this.personaService.actualizarPersona(this.idPersonaEditar, this.persona).subscribe({
         next: (res) => {
           if (res.success) {
-            alert('Huésped actualizado correctamente');
+            alert('Datos actualizados correctamente');
             this.router.navigate(['/personas']);
           } else {
             alert('Error: ' + res.message);
@@ -93,26 +99,27 @@ export class PersonaFormComponent implements OnInit {
       this.personaService.crearPersona(this.persona).subscribe({
         next: (res) => {
           if (res.success) {
-            
-            // DECISIÓN DE FLUJO
+
             if (irAHospedar) {
-              // Flujo A: Ir a Hospedar (Pasamos el DNI)
-              this.router.navigate(['/registro'], { 
-                queryParams: { dni: this.persona.dni } 
+              this.router.navigate(['/registro'], {
+                queryParams: { dni: this.persona.dni }
               });
             } else {
-              // Flujo B: Volver a la lista
               alert('Huésped registrado correctamente');
               this.router.navigate(['/personas']);
             }
 
           } else {
-             alert('Error: ' + res.message);
+            alert('Error: ' + res.message);
           }
           this.isLoading = false;
         },
-        error: () => {
-          alert('Error al guardar');
+        error: (err) => {
+          console.error('Error completo:', err);
+          const mensajeError = err.error?.mensaje || 'Error al conectar con el servidor';
+
+          alert('ADVERTENCIA: ' + mensajeError);
+
           this.isLoading = false;
         }
       });

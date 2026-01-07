@@ -41,14 +41,12 @@ export class HabitacionListComponent implements OnInit {
     });
   }
 
-  // --- LÓGICA PRINCIPAL DEL FLUJO ---
   gestionarHabitacion(hab: Habitacion): void {
     if (hab.estado === 'DISPONIBLE') {
-      // CASO 1: Está libre -> Vamos al Registro (Check-in)
-      this.router.navigate(['/registro'], { 
+      this.router.navigate(['/registro/nuevo'], { 
         queryParams: { 
           idHabitacion: hab.idhabitacion, 
-          tipo: hab.tipo // Pasamos si es ESTUDIANTE o PACIENTE para bloquear el select
+          tipo: hab.tipo 
         } 
       });
     } else {

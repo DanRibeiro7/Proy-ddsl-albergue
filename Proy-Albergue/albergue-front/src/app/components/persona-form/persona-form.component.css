@@ -1,0 +1,19 @@
+.card {
+    transition: transform 0.2s;
+}
+
+.input-group-text {
+    background-color: #f8f9fa;
+    border-right: none;
+}
+
+.form-control:focus, .form-select:focus {
+    box-shadow: none;
+    border-color: #86b7fe;
+}
+
+/* Validación suave */
+.form-control.is-invalid {
+    border-color: #dc3545;
+    background-image: none; /* Quitamos el icono por defecto de bootstrap si molesta */
+}

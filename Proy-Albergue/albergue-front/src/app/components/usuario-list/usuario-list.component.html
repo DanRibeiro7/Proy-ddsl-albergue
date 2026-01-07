@@ -1,0 +1,78 @@
+<div class="container-fluid">
+
+  <h3 class="mb-3">
+    <i class="bi bi-people-fill me-2"></i>
+    Gestión de Usuarios
+  </h3>
+
+  <!-- NUEVO USUARIO -->
+  <div class="card mb-4">
+    <div class="card-header fw-bold">
+      Nuevo Usuario
+    </div>
+    <div class="card-body d-flex gap-2">
+
+      <input
+        type="text"
+        class="form-control"
+        placeholder="Usuario"
+        [(ngModel)]="nuevoUsuario.username"
+      />
+
+      <input
+        type="password"
+        class="form-control"
+        placeholder="Contraseña"
+        [(ngModel)]="nuevoUsuario.password"
+      />
+
+      <select
+        class="form-select"
+        [(ngModel)]="nuevoUsuario.rol">
+        <option value="ADMIN">ADMIN</option>
+        <option value="USUARIO">USUARIO</option>
+      </select>
+
+      <button class="btn btn-success" (click)="crearUsuario()">
+        <i class="bi bi-plus-circle"></i>
+      </button>
+
+    </div>
+  </div>
+
+  <!-- LISTA -->
+  <table class="table table-bordered table-striped">
+    <thead class="table-dark">
+      <tr>
+        <th>#</th>
+        <th>Usuario</th>
+        <th>Rol</th>
+        <th>Estado</th>
+        <th>Acción</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr *ngFor="let u of usuarios; index as i">
+        <td>{{ i + 1 }}</td>
+        <td>{{ u.username }}</td>
+        <td>{{ u.rol }}</td>
+        <td>
+          <span
+            class="badge"
+            [ngClass]="u.estado === 'ACTIVO' ? 'bg-success' : 'bg-danger'">
+            {{ u.estado }}
+          </span>
+        </td>
+        <td>
+          <button
+            class="btn btn-sm btn-warning"
+            (click)="cambiarEstado(u)">
+            {{ u.estado === 'ACTIVO' ? 'Desactivar' : 'Activar' }}
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>

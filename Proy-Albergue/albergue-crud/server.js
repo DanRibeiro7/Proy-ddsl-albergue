@@ -7,6 +7,8 @@ const personaRoutes = require('./routes/personaRoutes');
 const habitacionRoutes = require('./routes/habitacionRoutes');
 const registroRoutes = require('./routes/registroRoutes');
 const usuarioRoutes = require('./routes/usuarioRoutes');
+const authRoutes = require('./routes/authRoutes');
+const reporteRoutes = require('./routes/reporteRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -21,10 +23,12 @@ app.use(express.urlencoded({ extended: true }));
 // =====================
 // Rutas principales
 // =====================
+app.use('/api/auth', authRoutes);
 app.use('/api/personas', personaRoutes);
 app.use('/api/habitaciones', habitacionRoutes);
 app.use('/api/registros', registroRoutes);
 app.use('/api/usuarios', usuarioRoutes);
+app.use('/api/reportes', reporteRoutes);
 
 // =====================
 // Ruta raíz

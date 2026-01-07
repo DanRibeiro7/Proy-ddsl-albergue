@@ -1,33 +1,56 @@
 const db = require('../config/database');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
-// Crear usuario
+// LISTAR usuarios
+const listarUsuarios = async (req, res) => {
+  const [rows] = await db.query(`
+    SELECT u.idusuario, u.username, u.estado, r.nombre AS rol
+    FROM usuario u
+    INNER JOIN rol r ON u.idrol = r.idrol
+  `);
+
+  res.json({ success: true, data: rows });
+};
+
+// CREAR usuario
 const crearUsuario = async (req, res) => {
-    try {
-        const { username, password, idrol } = req.body;
+  const { username, password, idrol } = req.body;
 
-        const hash = await bcrypt.hash(password, 10);
+  if (!username || !password || !idrol) {
+    return res.status(400).json({
+      success: false,
+      mensaje: 'Datos incompletos'
+    });
+  }
 
-        await db.query(
-            `INSERT INTO usuario(username, password, idrol)
-             VALUES (?, ?, ?)`,
-            [username, hash, idrol]
-        );
+  const hash = await bcrypt.hash(password, 10);
 
-        res.status(201).json({
-            success: true,
-            mensaje: 'Usuario creado correctamente'
-        });
+  await db.query(
+    'INSERT INTO usuario (username, password, idrol) VALUES (?, ?, ?)',
+    [username, hash, idrol]
+  );
 
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            mensaje: 'Error al crear usuario',
-            error: error.message
-        });
-    }
+  res.status(201).json({
+    success: true,
+    mensaje: 'Usuario creado correctamente'
+  });
+};
+
+// CAMBIAR estado
+const cambiarEstado = async (req, res) => {
+  const { id } = req.params;
+  const { estado } = req.body;
+
+  await db.query(
+    'UPDATE usuario SET estado = ? WHERE idusuario = ?',
+    [estado, id]
+  );
+
+  res.json({ success: true, mensaje: 'Estado actualizado' });
 };
 
 module.exports = {
-    crearUsuario
+  listarUsuarios,
+  crearUsuario,
+  cambiarEstado
 };

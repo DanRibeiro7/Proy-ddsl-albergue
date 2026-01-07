@@ -8,7 +8,7 @@ const {
 } = require('../controllers/registroController');
 
 router.get('/', obtenerRegistros); 
-router.post('/', registrarIngreso);
+router.post('/ingreso', registrarIngreso);
 router.put('/salida', registrarSalida);
 
 module.exports = router;

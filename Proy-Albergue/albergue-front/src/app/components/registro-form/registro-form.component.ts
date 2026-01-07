@@ -14,7 +14,7 @@ import { Habitacion } from '../../models/habitacion.interface';
   imports: [CommonModule, FormsModule],
   templateUrl: './registro-form.component.html',
   styleUrls: ['./registro-form.component.css']
-})
+})  
 export class RegistroComponent implements OnInit {
 
   // Variables de control
@@ -106,6 +106,12 @@ export class RegistroComponent implements OnInit {
           if (res.success && res.data) {
             // Asignamos la data encontrada al formulario
             this.persona = res.data as any;
+            if (this.persona.datosEstudiante) {
+            this.datosEstudiante = this.persona.datosEstudiante;
+        }
+        if (this.persona.datosPaciente) {
+            this.datosPaciente = this.persona.datosPaciente;
+        }
           }
           this.isLoading = false;
         },
@@ -115,7 +121,7 @@ export class RegistroComponent implements OnInit {
   }
 
   guardarRegistro() {
-    // Validaciones
+    // 1. Validaciones
     if (this.habitacionId === 0) {
       alert('Debe seleccionar una habitación');
       return;
@@ -125,7 +131,7 @@ export class RegistroComponent implements OnInit {
       return;
     }
 
-    // Preparar datos extra según tipo
+    // 2. Preparar datos extra
     if (this.persona.idtipo_persona === 1) {
        this.persona.datosPaciente = this.datosPaciente;
     } else if (this.persona.idtipo_persona === 2) {
@@ -135,50 +141,80 @@ export class RegistroComponent implements OnInit {
     this.isLoading = true;
     this.persona.idtipo_persona = this.tipoHabitacion === 'ESTUDIANTE' ? 2 : 1;
 
-    // 1. Intentamos crear/actualizar la persona primero
-    this.personaService.crearPersona(this.persona).subscribe({
-      next: (resPer) => {
-        if (resPer.success) {
-          const idPersona = resPer.data.idpersona || resPer.data.insertId;
-
-          // 2. Crear el registro de hospedaje
-          const nuevoRegistro: Registro = {
-            idpersona: idPersona,
-            idhabitacion: this.habitacionId,
-            fecha_ingreso: this.fechaIngreso,
-            estado: 'ACTIVO'
-          };
-
-          this.registroService.crearRegistro(nuevoRegistro).subscribe({
-            next: (resReg) => {
-              if (resReg.success) {
-                alert('¡Hospedaje registrado con éxito!');
-                this.router.navigate(['/habitaciones']);
-              } else {
-                alert('Error al registrar hospedaje: ' + resReg.message);
-              }
-              this.isLoading = false;
-            },
-            error: (err) => {
-              console.error(err);
-              alert('Fallo al crear el hospedaje');
-              this.isLoading = false;
-            }
-          });
-
-        } else {
-           alert('Error al procesar persona: ' + resPer.message);
-           this.isLoading = false;
+    // 3. LÓGICA INTELIGENTE: ¿Crear o Actualizar?
+    
+    if (this.persona.idpersona) {
+      // CASO A: La persona YA EXISTE (el buscador trajo su ID) -> ACTUALIZAMOS
+      this.personaService.actualizarPersona(this.persona.idpersona, this.persona).subscribe({
+        next: (res) => {
+          if (res.success) {
+            // Pasamos directo a crear el registro de hospedaje
+            this.finalizarHospedaje(this.persona.idpersona!); 
+          } else {
+            alert('Error al actualizar datos: ' + res.message);
+            this.isLoading = false;
+          }
+        },
+        error: (err) => {
+          console.error(err);
+          alert('Error al actualizar la información de la persona');
+          this.isLoading = false;
         }
+      });
+
+    } else {
+      // CASO B: La persona ES NUEVA (no tiene ID) -> CREAMOS
+      this.personaService.crearPersona(this.persona).subscribe({
+        next: (resPer) => {
+          if (resPer.success) {
+            const nuevoId = resPer.data.idpersona || resPer.data.insertId;
+            this.finalizarHospedaje(nuevoId);
+          } else {
+             alert('Error al guardar persona: ' + resPer.message);
+             this.isLoading = false;
+          }
+        },
+        error: (err) => {
+          // Aquí atrapamos el error del DNI duplicado si el buscador falló
+          const mensaje = err.error?.mensaje || err.message;
+          alert('No se pudo registrar la persona: ' + mensaje);
+          this.isLoading = false;
+        }
+      });
+    }
+  }
+  finalizarHospedaje(idPersona: number) {
+    
+    // Agregamos la hora actual a la fecha seleccionada
+    const ahora = new Date();
+    const horaActual = ahora.toTimeString().split(' ')[0]; // "14:30:00"
+    const fechaConHora = `${this.fechaIngreso} ${horaActual}`;
+
+    const nuevoRegistro: Registro = {
+      idpersona: idPersona,
+      idhabitacion: this.habitacionId,
+      fecha_ingreso: fechaConHora,
+      estado: 'ACTIVO'
+    };
+
+    this.registroService.crearRegistro(nuevoRegistro).subscribe({
+      next: (resReg) => {
+        if (resReg.success) {
+          alert('¡Hospedaje registrado con éxito!');
+          this.router.navigate(['/habitaciones']);
+        } else {
+          alert('Error del servidor: ' + resReg.message);
+        }
+        this.isLoading = false;
       },
       error: (err) => {
-        console.error(err);
-        alert('Error de conexión');
+        console.error('ERROR REGISTRO:', err);
+        const mensaje = err.error?.mensaje || 'Error desconocido';
+        alert('Fallo al crear el hospedaje: ' + mensaje);
         this.isLoading = false;
       }
     });
   }
-
   cancelar() {
     this.router.navigate(['/habitaciones']);
   }
