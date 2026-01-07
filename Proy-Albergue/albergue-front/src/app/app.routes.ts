@@ -1,71 +1,55 @@
 import { Routes } from '@angular/router';
 
-// Componentes Base
+// Componentes de Login y Layout
 import { LoginComponent } from './components/login/login.component';
 import { LayoutComponent } from './components/layout/layout.component';
 
-// Componentes del Sistema (TUYOS + FUSIONADOS)
+// Componentes Principales
 import { HabitacionListComponent } from './components/habitacion-list/habitacion-list.component';
-import { RegistroListComponent } from './components/registro-list/registro-list.component'; // Lista de Registros
-import { RegistroComponent } from './components/registro-form/registro-form.component';     // Formulario Registro
-import { PersonaListComponent } from './components/persona-list/persona-list.component';     // Lista Personas
-import { PersonaFormComponent } from './components/persona-form/persona-form.component';     // Formulario Persona
-import { UsuarioListComponent } from './components/usuario-list/usuario-list.component';     // Gestión Usuarios
+import { RegistroComponent } from './components/registro-form/registro-form.component';
+import { UsuarioListComponent } from './components/usuario-list/usuario-list.component';
 
-// Reportes (DEL COMPAÑERO)
-import { ReporteTotalComponent } from './components/reportes/reporte-total.component';
-import { ReportePacientesComponent } from './components/reportes/reporte-pacientes.component';
-import { ReporteEstudiantesComponent } from './components/reportes/reporte-estudiantes.component';
+// ✅ ÚNICO COMPONENTE DE REPORTES (EL NUEVO DASHBOARD)
+// Nota: Ajusta la ruta si creaste una carpeta extra, pero según tu imagen está aquí:
+import { ReporteDashboardComponent } from './components/reportes/reporte-dashboard.component';
 
-// Guards
+// Guards de Seguridad
 import { AuthGuard } from './guards/auth.guard';
 import { AdminGuard } from './guards/admin.guard';
 
 export const routes: Routes = [
 
-  // 🔓 LOGIN (Pública)
-  { path: 'login', component: LoginComponent },
+  // 🔓 LOGIN (Pública)
+  { path: 'login', component: LoginComponent },
 
-  // 🔐 PRIVADO CON SIDEBAR (Protegido por AuthGuard)
-  {
-    path: '',
-    component: LayoutComponent,
-    canActivate: [AuthGuard],
-    children: [
-      
-      // === TUS RUTAS FUSIONADAS ===
-      
-      // 1. Habitaciones (Dashboard Principal)
-      { path: 'habitaciones', component: HabitacionListComponent },
+  // 🔐 ÁREA PRIVADA (Con Menú Lateral/Layout)
+  {
+    path: '',
+    component: LayoutComponent,
+    canActivate: [AuthGuard], // Protege todas las rutas hijas
+    children: [
+      
+      // Rutas Principales
+      { path: 'habitaciones', component: HabitacionListComponent },
+      { path: 'registro', component: RegistroComponent },
 
-      // 2. Registros (Hospedaje)
-      { path: 'registros', component: RegistroListComponent },        // Lista
-      { path: 'registro/nuevo', component: RegistroComponent },       // Formulario
+      // 👑 GESTIÓN DE USUARIOS (Solo Admin)
+      {
+        path: 'usuarios',
+        component: UsuarioListComponent,
+        canActivate: [AdminGuard]
+      },
 
-      // 3. Personas (Huéspedes)
-      { path: 'personas', component: PersonaListComponent },          // Lista
-      { path: 'personas/nuevo', component: PersonaFormComponent },    // Crear
-      { path: 'personas/editar/:id', component: PersonaFormComponent }, // Editar
+      // 📊 REPORTES (DASHBOARD)
+      // Esta es la única ruta que necesitas ahora. 
+      // Al entrar a /reportes se verán las tarjetas y gráficas.
+      { path: 'reportes', component: ReporteDashboardComponent },
 
-      // === RUTAS DEL COMPAÑERO ===
+      // Redirección por defecto al entrar al sistema
+      { path: '', redirectTo: 'habitaciones', pathMatch: 'full' }
+    ]
+  },
 
-      // 👑 Usuarios (Solo Admin)
-      {
-        path: 'usuarios',
-        component: UsuarioListComponent,
-        canActivate: [AdminGuard]
-      },
-
-      // 📊 Reportes
-      { path: 'reportes/total', component: ReporteTotalComponent },
-      { path: 'reportes/pacientes', component: ReportePacientesComponent },
-      { path: 'reportes/estudiantes', component: ReporteEstudiantesComponent },
-
-      // Redirección por defecto al entrar logueado
-      { path: '', redirectTo: 'habitaciones', pathMatch: 'full' }
-    ]
-  },
-
-  // ❌ Ruta desconocida -> Login
-  { path: '**', redirectTo: 'login' }
+  // ❌ RUTAS NO ENCONTRADAS (Redirigir al Login)
+  { path: '**', redirectTo: 'login' }
 ];

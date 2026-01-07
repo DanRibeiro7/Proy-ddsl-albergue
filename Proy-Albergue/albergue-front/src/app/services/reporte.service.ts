@@ -1,11 +1,16 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AuthService } from './auth.service';
+// CORRECCIÓN AQUÍ: Solo un nivel arriba (..)
+import { environment } from '../environment/environment'; 
 
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root'
+})
 export class ReporteService {
 
-  private apiUrl = 'http://localhost:3000/api/reportes';
+  // Asegúrate de usar backticks (``) para que funcione el ${}
+  private apiUrl = `${environment.apiUrl}/reportes`;
 
   constructor(
     private http: HttpClient,
@@ -20,15 +25,21 @@ export class ReporteService {
     };
   }
 
-  total() {
+  // --- MÉTODOS DEL DASHBOARD ---
+
+  obtenerTotal() {
     return this.http.get<any>(`${this.apiUrl}/total`, this.headers());
   }
 
-  pacientes() {
-    return this.http.get<any>(`${this.apiUrl}/pacientes`, this.headers());
+  obtenerPorTipo() {
+    return this.http.get<any>(`${this.apiUrl}/por-tipo`, this.headers());
   }
 
-  estudiantes() {
-    return this.http.get<any>(`${this.apiUrl}/estudiantes`, this.headers());
+  obtenerProcedencias() {
+    return this.http.get<any>(`${this.apiUrl}/procedencias`, this.headers());
+  }
+
+  obtenerEstadoHabitaciones() {
+    return this.http.get<any>(`${this.apiUrl}/habitaciones-estado`, this.headers());
   }
 }
