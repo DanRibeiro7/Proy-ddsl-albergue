@@ -12,15 +12,24 @@ export class UsuarioService {
 
   constructor(private http: HttpClient) {}
 
+  // LISTAR
   listar(): Observable<any> {
-    return this.http.get(this.apiUrl);
+    return this.http.get<any>(this.apiUrl);
   }
 
+  // CREAR
   crear(usuario: any): Observable<any> {
     return this.http.post(this.apiUrl, usuario);
   }
 
-  cambiarEstado(id: number): Observable<any> {
-    return this.http.put(`${this.apiUrl}/${id}/estado`, {});
+  // ACTUALIZAR
+  actualizar(id: number, usuario: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${id}`, usuario);
   }
+
+  // CAMBIAR ESTADO (ENUM)
+cambiarEstado(id: number, estado: 'ACTIVO' | 'INACTIVO'): Observable<any> {
+  return this.http.put(`${this.apiUrl}/${id}/estado`, { estado });
+}
+
 }

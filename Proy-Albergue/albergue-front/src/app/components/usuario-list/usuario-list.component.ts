@@ -13,7 +13,16 @@ export class UsuarioListComponent implements OnInit {
 
   usuarios: any[] = [];
 
+  // NUEVO
   nuevoUsuario = {
+    username: '',
+    password: '',
+    rol: 'USUARIO'
+  };
+
+  // EDITAR
+  usuarioEditando: any = null;
+  usuarioForm = {
     username: '',
     password: '',
     rol: 'USUARIO'
@@ -25,44 +34,93 @@ export class UsuarioListComponent implements OnInit {
     this.cargarUsuarios();
   }
 
+  // =========================
+  // LISTAR
+  // =========================
   cargarUsuarios() {
-    this.usuarioService.listar().subscribe(res => {
-      this.usuarios = res.data;
+    this.usuarioService.listar().subscribe({
+      next: (res) => this.usuarios = res.data,
+      error: () => alert('Error al cargar usuarios')
     });
   }
 
+  // =========================
+  // CREAR
+  // =========================
   crearUsuario() {
     if (!this.nuevoUsuario.username || !this.nuevoUsuario.password) {
-      alert('Complete los campos');
+      alert('Complete todos los campos');
       return;
     }
 
-    // MAPEO DE ROL A ID
-    const idRolToSend = this.nuevoUsuario.rol === 'ADMIN' ? 1 : 2;
+    const idrol = this.nuevoUsuario.rol === 'ADMIN' ? 1 : 2;
 
-    const usuarioParaEnviar = {
+    this.usuarioService.crear({
       username: this.nuevoUsuario.username,
       password: this.nuevoUsuario.password,
-      idrol: idRolToSend // Enviamos el ID, no el nombre
-    };
-
-    this.usuarioService.crear(usuarioParaEnviar).subscribe(() => { // Enviamos el objeto correcto
-      this.nuevoUsuario = {
-        username: '',
-        password: '',
-        rol: 'USUARIO'
-      };
-      this.cargarUsuarios();
-    }, (err) => {
-        alert('Error al crear usuario: ' + (err.error?.mensaje || err.message));
+      idrol
+    }).subscribe({
+      next: () => {
+        this.nuevoUsuario = { username: '', password: '', rol: 'USUARIO' };
+        this.cargarUsuarios();
+      },
+      error: (err) =>
+        alert('Error al crear usuario: ' + (err.error?.mensaje || err.message))
     });
   }
 
+  // =========================
+  // CAMBIAR ESTADO (ENUM)
+  // =========================
   cambiarEstado(usuario: any) {
-    if (!confirm('¿Seguro de cambiar estado?')) return;
+    if (!confirm('¿Seguro de cambiar el estado?')) return;
 
-    this.usuarioService.cambiarEstado(usuario.idusuario).subscribe(() => {
-      this.cargarUsuarios();
-    });
+    const nuevoEstado =
+      usuario.estado === 'ACTIVO' ? 'INACTIVO' : 'ACTIVO';
+
+    this.usuarioService
+      .cambiarEstado(usuario.idusuario, nuevoEstado)
+      .subscribe({
+        next: () => this.cargarUsuarios(),
+        error: () => alert('Error al cambiar estado')
+      });
+  }
+
+  // =========================
+  // EDITAR
+  // =========================
+  abrirEditar(usuario: any) {
+    this.usuarioEditando = usuario;
+    this.usuarioForm = {
+      username: usuario.username,
+      password: '',
+      rol: usuario.rol
+    };
+  }
+
+  actualizarUsuario() {
+    if (!this.usuarioEditando) return;
+
+    const idrol = this.usuarioForm.rol === 'ADMIN' ? 1 : 2;
+
+    const payload: any = {
+      username: this.usuarioForm.username,
+      idrol
+    };
+
+    if (this.usuarioForm.password) {
+      payload.password = this.usuarioForm.password;
+    }
+
+    this.usuarioService
+      .actualizar(this.usuarioEditando.idusuario, payload)
+      .subscribe({
+        next: () => {
+          this.usuarioEditando = null;
+          this.cargarUsuarios();
+          alert('Usuario actualizado');
+        },
+        error: () => alert('Error al actualizar usuario')
+      });
   }
 }

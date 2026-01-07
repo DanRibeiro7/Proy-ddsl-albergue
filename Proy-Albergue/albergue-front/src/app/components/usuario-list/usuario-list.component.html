@@ -7,24 +7,20 @@
 
   <!-- NUEVO USUARIO -->
   <div class="card mb-4">
-    <div class="card-header fw-bold">
-      Nuevo Usuario
-    </div>
-    <div class="card-body d-flex gap-2">
+    <div class="card-header fw-bold">Nuevo Usuario</div>
 
+    <div class="card-body d-flex gap-2">
       <input
         type="text"
         class="form-control"
         placeholder="Usuario"
-        [(ngModel)]="nuevoUsuario.username"
-      />
+        [(ngModel)]="nuevoUsuario.username">
 
       <input
         type="password"
         class="form-control"
         placeholder="Contraseña"
-        [(ngModel)]="nuevoUsuario.password"
-      />
+        [(ngModel)]="nuevoUsuario.password">
 
       <select
         class="form-select"
@@ -36,12 +32,11 @@
       <button class="btn btn-success" (click)="crearUsuario()">
         <i class="bi bi-plus-circle"></i>
       </button>
-
     </div>
   </div>
 
   <!-- LISTA -->
-  <table class="table table-bordered table-striped">
+  <table class="table table-bordered table-striped align-middle">
     <thead class="table-dark">
       <tr>
         <th>#</th>
@@ -57,6 +52,7 @@
         <td>{{ i + 1 }}</td>
         <td>{{ u.username }}</td>
         <td>{{ u.rol }}</td>
+
         <td>
           <span
             class="badge"
@@ -64,9 +60,19 @@
             {{ u.estado }}
           </span>
         </td>
+
         <td>
           <button
-            class="btn btn-sm btn-warning"
+            class="btn btn-sm btn-primary me-2"
+            data-bs-toggle="modal"
+            data-bs-target="#modalEditarUsuario"
+            (click)="abrirEditar(u)">
+            Editar
+          </button>
+
+          <button
+            class="btn btn-sm"
+            [ngClass]="u.estado === 'ACTIVO' ? 'btn-danger' : 'btn-success'"
             (click)="cambiarEstado(u)">
             {{ u.estado === 'ACTIVO' ? 'Desactivar' : 'Activar' }}
           </button>
@@ -75,4 +81,51 @@
     </tbody>
   </table>
 
+</div>
+
+<!-- MODAL EDITAR -->
+<div class="modal fade" id="modalEditarUsuario" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">Editar Usuario</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <input
+          type="text"
+          class="form-control mb-2"
+          placeholder="Usuario"
+          [(ngModel)]="usuarioForm.username">
+
+        <input
+          type="password"
+          class="form-control mb-2"
+          placeholder="Nueva contraseña (opcional)"
+          [(ngModel)]="usuarioForm.password">
+
+        <select
+          class="form-select"
+          [(ngModel)]="usuarioForm.rol">
+          <option value="ADMIN">ADMIN</option>
+          <option value="USUARIO">USUARIO</option>
+        </select>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">
+          Cancelar
+        </button>
+        <button
+          class="btn btn-primary"
+          data-bs-dismiss="modal"
+          (click)="actualizarUsuario()">
+          Guardar
+        </button>
+      </div>
+
+    </div>
+  </div>
 </div>
