@@ -1,19 +1,27 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router'; // Importante para el botón
+import { FormsModule } from '@angular/forms'; // <--- 1. IMPORTANTE
+import { RouterLink } from '@angular/router';
 import { RegistroService } from '../../services/registro.service';
 
 @Component({
   selector: 'app-registro-list',
   standalone: true,
-  imports: [CommonModule, RouterLink], // Agregamos RouterLink
+  imports: [CommonModule, RouterLink, FormsModule], // <--- 2. AGREGAR AQUÍ
   templateUrl: './registro-list.component.html',
   styleUrls: ['./registro-list.component.css']
 })
 export class RegistroListComponent implements OnInit {
 
-  listaRegistros: any[] = [];
+  // Variables de datos
+  listaCompleta: any[] = []; // Copia original
+  listaFiltrada: any[] = []; // La que mostramos
   loading: boolean = true;
+
+  // Variables de Filtro y Paginación
+  textoBusqueda: string = '';
+  paginaActual: number = 1;
+  itemsPorPagina: number = 15;
 
   constructor(private registroService: RegistroService) {}
 
@@ -23,9 +31,10 @@ export class RegistroListComponent implements OnInit {
 
   cargarRegistros() {
     this.registroService.obtenerRegistros().subscribe({
-      next: (res) => {
+      next: (res: any) => { // Asegúrate que tu servicio devuelve {success, data}
         if (res.success) {
-          this.listaRegistros = res.data;
+          this.listaCompleta = res.data;
+          this.listaFiltrada = res.data; // Al inicio son iguales
         }
         this.loading = false;
       },
@@ -34,5 +43,37 @@ export class RegistroListComponent implements OnInit {
         this.loading = false;
       }
     });
+  }
+
+  // --- LÓGICA DE FILTRADO ---
+  filtrar() {
+    const texto = this.textoBusqueda.toLowerCase();
+
+    if (texto === '') {
+      this.listaFiltrada = this.listaCompleta;
+    } else {
+      this.listaFiltrada = this.listaCompleta.filter(r => 
+        // Filtramos por Nombre, DNI o Número de Habitación
+        r.nombre_huesped.toLowerCase().includes(texto) ||
+        r.dni.includes(texto) ||
+        r.numero_habitacion.toString().includes(texto)
+      );
+    }
+    this.paginaActual = 1; // Volver a pág 1 si buscamos
+  }
+
+  // --- LÓGICA DE PAGINACIÓN ---
+  obtenerDatosPaginados() {
+    const inicio = (this.paginaActual - 1) * this.itemsPorPagina;
+    const fin = inicio + this.itemsPorPagina;
+    return this.listaFiltrada.slice(inicio, fin);
+  }
+
+  cambiarPagina(delta: number) {
+    this.paginaActual += delta;
+  }
+
+  get totalPaginas(): number {
+    return Math.ceil(this.listaFiltrada.length / this.itemsPorPagina);
   }
 }

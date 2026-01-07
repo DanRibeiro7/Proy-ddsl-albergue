@@ -13,7 +13,7 @@ import { RegistroService } from '../../services/registro.service';
   styleUrls: ['./habitacion-list.component.css']
 })
 export class HabitacionListComponent implements OnInit {
-
+  detalleSeleccionado: any = null;
   habitacionesEstudiantes: Habitacion[] = [];
   habitacionesPacientes: Habitacion[] = [];
 
@@ -46,14 +46,25 @@ export class HabitacionListComponent implements OnInit {
   gestionarHabitacion(hab: Habitacion): void {
     if (hab.estado === 'DISPONIBLE') {
       this.router.navigate(['/registro/nuevo'], { 
-        queryParams: { 
-          idHabitacion: hab.idhabitacion, 
-          tipo: hab.tipo 
-        } 
+        queryParams: { idHabitacion: hab.idhabitacion, tipo: hab.tipo } 
       });
     } else {
-      // CASO 2: Está ocupada -> Mostramos info (o podrías abrir un modal aquí)
-      alert(`La habitación ${hab.numero_habitacion} está ocupada actualmente.`);
+      // CASO 2: OCUPADA -> Fetch details and show Modal
+      this.habitacionService.obtenerDetalleOcupacion(hab.idhabitacion!).subscribe({
+        next: (res) => {
+          if (res.success) {
+            this.detalleSeleccionado = res.data;
+            // We use standard Bootstrap to open the modal via ID
+            const modalElement = document.getElementById('modalDetalleHabitacion');
+            if (modalElement) {
+              // @ts-ignore
+              const modal = new bootstrap.Modal(modalElement);
+              modal.show();
+            }
+          }
+        },
+        error: (err) => alert('Error al cargar detalles')
+      });
     }
   }
 

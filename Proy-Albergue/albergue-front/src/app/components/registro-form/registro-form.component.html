@@ -34,7 +34,24 @@
               <input type="text" class="form-control" [(ngModel)]="persona.apellidos">
             </div>
           </div>
+          <div class="mb-4">
+            <label class="form-label d-block fw-bold text-muted small">TIPO DE HUÉSPED</label>
+            <div class="btn-group w-100" role="group">
+              
+              <input type="radio" class="btn-check" name="tipoPersona" id="tipoEstudiante" 
+                     [value]="2" [(ngModel)]="persona.idtipo_persona">
+              <label class="btn btn-outline-success" for="tipoEstudiante">
+                <i class="bi bi-mortarboard-fill me-2"></i> Estudiante
+              </label>
+            
+              <input type="radio" class="btn-check" name="tipoPersona" id="tipoPaciente" 
+                     [value]="1" [(ngModel)]="persona.idtipo_persona">
+              <label class="btn btn-outline-primary" for="tipoPaciente">
+                <i class="bi bi-heart-pulse-fill me-2"></i> Paciente
+              </label>
 
+            </div>
+          </div>
           <div class="mb-3">
             <label class="form-label">Procedencia / Comunidad</label>
             <input type="text" class="form-control" [(ngModel)]="persona.procedencia"

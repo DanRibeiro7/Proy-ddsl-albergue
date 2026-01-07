@@ -37,52 +37,56 @@ const obtenerRegistros = async (req, res) => {
 const registrarIngreso = async (req, res) => {
     try {
         const { idpersona, idhabitacion, fecha_ingreso } = req.body;
+        const connection = await db.getConnection(); // Usamos conexión para transacciones si fuera necesario
 
-        // Validar capacidad
-        const [[hab]] = await db.query(
+        // 1. VALIDACIÓN NUEVA: ¿Esta persona ya vive aquí?
+        const [[huespedActivo]] = await connection.query(
+            "SELECT r.idhabitacion, h.numero_habitacion FROM registro r JOIN habitacion h ON r.idhabitacion = h.idhabitacion WHERE r.idpersona = ? AND r.estado = 'ACTIVO'",
+            [idpersona]
+        );
+
+        if (huespedActivo) {
+            connection.release();
+            return res.status(400).json({
+                success: false,
+                mensaje: `Esta persona ya está alojada en la Habitación ${huespedActivo.numero_habitacion}. Debe dar salida primero.`
+            });
+        }
+
+        // 2. Validar capacidad de la habitación (Código que ya tenías)
+        const [[hab]] = await connection.query(
             'SELECT capacidad FROM habitacion WHERE idhabitacion = ?',
             [idhabitacion]
         );
 
-        const [[ocupados]] = await db.query(
-            `SELECT COUNT(*) total
-             FROM registro
-             WHERE idhabitacion = ? AND estado = 'ACTIVO'`,
+        const [[ocupados]] = await connection.query(
+            "SELECT COUNT(*) total FROM registro WHERE idhabitacion = ? AND estado = 'ACTIVO'",
             [idhabitacion]
         );
 
         if (ocupados.total >= hab.capacidad) {
-            return res.status(400).json({
-                success: false,
-                mensaje: 'Habitación sin cupos disponibles'
-            });
+            connection.release();
+            return res.status(400).json({ success: false, mensaje: 'Habitación sin cupos disponibles' });
         }
 
-        // Insertar registro
-        await db.query(
-            `INSERT INTO registro(idpersona, idhabitacion, fecha_ingreso, estado)
-             VALUES (?, ?, ?, 'ACTIVO')`,
+        // 3. Insertar registro
+        await connection.query(
+            "INSERT INTO registro(idpersona, idhabitacion, fecha_ingreso, estado) VALUES (?, ?, ?, 'ACTIVO')",
             [idpersona, idhabitacion, fecha_ingreso]
         );
 
-        // Actualizar estado de habitación a OCUPADA
-        await db.query(
-            `UPDATE habitacion SET estado='OCUPADA'
-             WHERE idhabitacion=?`,
+        // 4. Actualizar estado habitación
+        await connection.query(
+            "UPDATE habitacion SET estado='OCUPADA' WHERE idhabitacion=?",
             [idhabitacion]
         );
 
-        res.status(201).json({
-            success: true,
-            mensaje: 'Ingreso registrado correctamente'
-        });
+        connection.release();
+
+        res.status(201).json({ success: true, mensaje: 'Ingreso registrado correctamente' });
 
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            mensaje: 'Error al registrar ingreso',
-            error: error.message
-        });
+        res.status(500).json({ success: false, mensaje: 'Error al registrar ingreso', error: error.message });
     }
 };
 
