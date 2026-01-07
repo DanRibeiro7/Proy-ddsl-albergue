@@ -177,10 +177,47 @@ const eliminarHabitacion = async (req, res) => {
     }
 };
 
+const obtenerDetalleOcupacion = async (req, res) => {
+    try {
+        const { idhabitacion } = req.params;
+        const connection = await db.getConnection();
+
+        // Query to get EVERYTHING about the current occupant
+        const sql = `
+            SELECT 
+                h.numero_habitacion, h.piso, h.tipo as tipo_habitacion,
+                r.fecha_ingreso,
+                p.nombres, p.apellidos, p.dni, p.procedencia, p.telefono, p.idtipo_persona,
+                -- Student Data
+                fe.institucion, fe.carrera, fe.ciclo_actual,
+                -- Patient Data
+                fp.diagnostico, fp.hospital_origen, fp.codigo_sis
+            FROM habitacion h
+            JOIN registro r ON h.idhabitacion = r.idhabitacion
+            JOIN persona p ON r.idpersona = p.idpersona
+            LEFT JOIN ficha_estudiante fe ON p.idpersona = fe.idpersona
+            LEFT JOIN ficha_paciente fp ON p.idpersona = fp.idpersona
+            WHERE h.idhabitacion = ? AND r.estado = 'ACTIVO'
+        `;
+
+        const [rows] = await connection.query(sql, [idhabitacion]);
+        connection.release();
+
+        if (rows.length === 0) {
+            return res.status(404).json({ success: false, mensaje: "No hay ocupación activa" });
+        }
+
+        res.json({ success: true, data: rows[0] });
+
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+};
 module.exports = {
     obtenerHabitaciones,
     obtenerHabitacionPorId,
     crearHabitacion,
     actualizarHabitacion,
-    eliminarHabitacion
+    eliminarHabitacion,
+    obtenerDetalleOcupacion
 };

@@ -101,21 +101,41 @@ export class RegistroComponent implements OnInit {
   buscarDni() {
     if (this.persona.dni.length === 8) {
       this.isLoading = true;
+      
+      // Limpiamos datos previos por si busca otro DNI seguido
+      this.persona.idpersona = undefined; 
+      
       this.personaService.buscarPorDni(this.persona.dni).subscribe({
         next: (res) => {
           if (res.success && res.data) {
-            // Asignamos la data encontrada al formulario
+            // SI EXISTE: Llenamos todo
             this.persona = res.data as any;
-            if (this.persona.datosEstudiante) {
-            this.datosEstudiante = this.persona.datosEstudiante;
-        }
-        if (this.persona.datosPaciente) {
-            this.datosPaciente = this.persona.datosPaciente;
-        }
+            if (this.persona.datosEstudiante) this.datosEstudiante = this.persona.datosEstudiante;
+            if (this.persona.datosPaciente) this.datosPaciente = this.persona.datosPaciente;
+          } else {
+            // SI NO EXISTE: Limpiamos nombres pero mantenemos DNI
+            const dniTemp = this.persona.dni;
+            this.persona = { 
+              dni: dniTemp, nombres: '', apellidos: '', telefono: '', procedencia: '' 
+            };
+            
+            // SUGERENCIA INTELIGENTE:
+            // Si la habitación es de estudiantes, marcamos "Estudiante" por defecto
+            if (this.tipoHabitacion === 'ESTUDIANTE') {
+              this.persona.idtipo_persona = 2;
+            } else if (this.tipoHabitacion === 'PACIENTE') {
+              this.persona.idtipo_persona = 1;
+            }
+            // (Si no hay habitación seleccionada, el usuario elegirá manualmente con los botones nuevos)
           }
           this.isLoading = false;
         },
-        error: () => this.isLoading = false
+        error: () => {
+          this.isLoading = false;
+           // En caso de error de red, asumimos nuevo y aplicamos misma lógica
+           if (this.tipoHabitacion === 'ESTUDIANTE') this.persona.idtipo_persona = 2;
+           else if (this.tipoHabitacion === 'PACIENTE') this.persona.idtipo_persona = 1;
+        }
       });
     }
   }

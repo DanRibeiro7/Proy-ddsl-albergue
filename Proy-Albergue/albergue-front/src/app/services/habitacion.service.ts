@@ -11,7 +11,7 @@ export class HabitacionService {
 
   private apiUrl = `${environment.apiUrl}/habitaciones`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   obtenerHabitaciones(): Observable<HabitacionResponse> {
     return this.http.get<HabitacionResponse>(this.apiUrl);
@@ -38,5 +38,8 @@ export class HabitacionService {
 
   eliminarHabitacion(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${id}`);
+  }
+  obtenerDetalleOcupacion(idHabitacion: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/${idHabitacion}/detalle`);
   }
 }

@@ -6,7 +6,8 @@ const {
     obtenerHabitacionPorId,
     crearHabitacion,
     actualizarHabitacion,
-    eliminarHabitacion
+    eliminarHabitacion,
+    obtenerDetalleOcupacion
 } = require('../controllers/habitacionController');
 
 // GET
@@ -21,5 +22,6 @@ router.put('/:id', actualizarHabitacion);
 
 // DELETE
 router.delete('/:id', eliminarHabitacion);
+router.get('/:idhabitacion/detalle', obtenerDetalleOcupacion);
 
 module.exports = router;
