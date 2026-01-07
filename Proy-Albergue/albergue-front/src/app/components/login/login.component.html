@@ -1,22 +1,58 @@
-<div class="container d-flex justify-content-center align-items-center" style="height:100vh">
-  <div class="card p-4 shadow" style="width:350px">
-    <h4 class="text-center mb-3">Iniciar Sesión</h4>
+<div class="d-flex justify-content-center align-items-center vh-100"
+     style="background: linear-gradient(135deg, #212529 0%, #0d6efd 100%);">
+     <div class="card p-4 p-md-5 shadow-lg border-0" 
+       style="width: 400px; border-radius: 20px; background-color: rgba(255, 255, 255, 0.95);">
 
-    <div *ngIf="error" class="alert alert-danger">
-      {{ error }}
+    <div class="text-center mb-4">
+      <div class="d-inline-flex justify-content-center align-items-center bg-primary bg-opacity-10 rounded-circle mb-3"
+           style="width: 80px; height: 80px;">
+        <i class="bi bi-buildings-fill fs-1 text-primary"></i>
+      </div>
+      
+      <h2 class="fw-bold text-dark mb-1">Albergue Yurúa</h2>
+      <p class="text-muted small text-uppercase fw-bold ls-1">Acceso al Sistema</p>
     </div>
 
-    <input class="form-control mb-2"
-           placeholder="Usuario"
-           [(ngModel)]="username">
+    <div *ngIf="error" class="alert alert-danger d-flex align-items-center mb-4 rounded-3 shadow-sm" role="alert">
+      <i class="bi bi-exclamation-circle-fill me-2 fs-5"></i>
+      <div>{{ error }}</div>
+    </div>
 
-    <input type="password"
-           class="form-control mb-3"
-           placeholder="Contraseña"
-           [(ngModel)]="password">
+    <div class="mb-3">
+      <label class="form-label text-muted small fw-bold ms-1">USUARIO</label>
+      <div class="input-group">
+        <span class="input-group-text bg-light border-end-0 text-primary">
+          <i class="bi bi-person-fill fs-5"></i>
+        </span>
+        <input type="text" 
+               class="form-control bg-light border-start-0 py-2" 
+               placeholder="Nombre de usuario"
+               [(ngModel)]="username"
+               (keyup.enter)="login()"> </div>
+    </div>
 
-    <button class="btn btn-primary w-100" (click)="login()">
-      Entrar
+    <div class="mb-4">
+      <label class="form-label text-muted small fw-bold ms-1">CONTRASEÑA</label>
+      <div class="input-group">
+        <span class="input-group-text bg-light border-end-0 text-primary">
+          <i class="bi bi-lock-fill fs-5"></i>
+        </span>
+        <input type="password" 
+               class="form-control bg-light border-start-0 py-2" 
+               placeholder="Contraseña"
+               [(ngModel)]="password"
+               (keyup.enter)="login()">
+      </div>
+    </div>
+
+    <button class="btn btn-primary w-100 py-2 rounded-pill fw-bold shadow-sm mb-3 scale-hover" 
+            (click)="login()">
+      INGRESAR <i class="bi bi-box-arrow-in-right ms-2"></i>
     </button>
+
+    <div class="text-center mt-3">
+      <small class="text-muted">Municipalidad Distrital de Yurúa &copy; 2026</small>
+    </div>
+
   </div>
 </div>
