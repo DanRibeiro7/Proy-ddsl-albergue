@@ -1,70 +1,68 @@
-/* Tarjeta Base Compacta */
+/* --- TARJETA BASE --- */
 .room-card.compact {
-  border-radius: 8px;
-  padding: 0.8rem;
-  transition: transform 0.2s, box-shadow 0.2s;
+  border-radius: 12px;
+  padding: 0.8rem; /* Menos relleno interno */
+  transition: all 0.3s ease;
   cursor: pointer;
   position: relative;
-  min-height: 150px; /* Altura reducida para que quepan más */
+  
+  /* AJUSTE DE ALTURA: */
+  height: 100%;       
+  min-height: 0px;   /* <--- Reducido de 150px a 110px */
+  
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   border: 1px solid rgba(0,0,0,0.08);
   background-color: white;
+  overflow: hidden;
 }
 
 .room-card.compact:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+  transform: translateY(-3px); /* Movimiento más sutil */
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
   z-index: 10;
 }
-.room-card {
-  /* ... tus estilos actuales ... */
-  min-height: 120px; /* Dale un poco más de altura para que quepan los datos */
-  display: flex;
-  flex-direction: column;
-}
 
-.text-truncate {
-  max-width: 100%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: block;
-}
-/* --- ESTADOS --- */
-
-/* DISPONIBLE (Estilo minimalista verde) */
+/* --- ESTADOS (COLORES) --- */
 .room-card.available {
-  border-left: 4px solid #198754;
+  border-left: 6px solid #198754; /* Borde un poco más fino */
   background: linear-gradient(to bottom right, #ffffff, #f0fdf4);
 }
 .room-card.available .room-number { color: #198754; }
-.room-card.available .status-text { color: #198754; font-weight: 600; opacity: 0.8; }
+.room-card.available .status-text { color: #198754; }
 
-/* OCUPADA (Estilo minimalista rojo suave) */
 .room-card.occupied {
-  border-left: 4px solid #dc3545;
-  background: linear-gradient(to bottom right, #fff5f5, #ffebe9);
+  border-left: 6px solid #dc3545;
+  background: linear-gradient(to bottom right, #ffffff, #fff5f5);
 }
 .room-card.occupied .room-number { color: #dc3545; }
-.room-card.occupied .status-text { color: #dc3545; font-weight: 600; opacity: 0.8; }
+.room-card.occupied .status-text { color: #dc3545; }
 
-
-/* --- TIPOGRAFÍA Y ELEMENTOS --- */
+/* --- TEXTOS --- */
 .room-number {
-  font-size: 1.8rem; /* Grande pero no gigante */
+  font-size: 1.6rem; /* Reducido un poco para equilibrar */
   font-weight: 800;
   line-height: 1;
 }
 
 .status-text {
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 1px;
+  font-weight: 700;
+  opacity: 0.7;
 }
 
-/* Botón flotante para liberar espacio */
+.text-truncate {
+  max-width: 85%; /* Dejar espacio para el botón */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+/* --- BOTÓN FLOTANTE (SALIDA) --- */
 .btn-liberar {
   position: absolute;
   bottom: 8px;
@@ -72,17 +70,22 @@
   background-color: white;
   border: 1px solid #dc3545;
   color: #dc3545;
-  width: 30px;
-  height: 30px;
+  
+  /* Reducido para que quepa en la tarjeta más pequeña */
+  width: 35px;  /* <--- Reducido de 50px */
+  height: 35px; /* <--- Reducido de 50px */
+  
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.2s;
-  font-size: 0.9rem;
+  box-shadow: 0 2px 5px rgba(220, 53, 69, 0.2);
+  font-size: 1rem; /* Icono ajustado */
 }
 
 .btn-liberar:hover {
   background-color: #dc3545;
   color: white;
+  transform: scale(1.1);
 }

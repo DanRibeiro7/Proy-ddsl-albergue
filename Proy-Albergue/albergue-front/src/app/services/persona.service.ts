@@ -30,7 +30,6 @@ export class PersonaService {
     return this.http.put<ApiResponse>(`${this.apiUrl}/${id}`, datos);
   }
 
-  // 👇 ESTE ES EL MÉTODO QUE TE FALTABA 👇
   eliminarPersona(id: number): Observable<ApiResponse> {
     return this.http.delete<ApiResponse>(`${this.apiUrl}/${id}`);
   }

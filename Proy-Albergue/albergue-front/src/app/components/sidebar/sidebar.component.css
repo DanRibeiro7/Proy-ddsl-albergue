@@ -1,33 +1,108 @@
-.sidebar-container {
-  width: 280px;
-  min-height: 100vh; /* Ocupa toda la altura vertical */
-  height: 100%;
-  position: sticky;
-  top: 0;
-  box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+/* --- CONTENEDOR PRINCIPAL --- */
+.sidebar-modern {
+    height: 100vh;
+    background-color: #111827;
+    background-image: linear-gradient(180deg, #111827 0%, #0f131f 100%);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    width: 260px; /* Ancho fijo */
+    transition: all 0.3s ease;
+    overflow: hidden; /* Evita scroll horizontal */
 }
 
-/* Efecto hover en los links */
-.nav-pills .nav-link {
-  border-radius: 8px;
-  transition: all 0.2s;
-  font-weight: 500;
-  margin-bottom: 5px;
+/* --- SCROLLBAR INVISIBLE PERO FUNCIONAL --- */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+.custom-scrollbar:hover::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.2);
 }
 
-.nav-pills .nav-link:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  transform: translateX(5px); /* Pequeño movimiento a la derecha */
+/* --- LOGO --- */
+.logo-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+}
+.tracking-widest { letter-spacing: 2px; }
+
+/* --- LINKS --- */
+.custom-link {
+    color: #9ca3af;
+    font-weight: 500;
+    padding: 10px 14px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    font-size: 0.95rem;
 }
 
-/* Color del link activo (Donde estás actualmente) */
-.nav-pills .nav-link.active, .nav-pills .show > .nav-link {
-  background-color: #0d6efd; /* Azul Bootstrap */
-  box-shadow: 0 4px 6px rgba(13, 110, 253, 0.4);
+.custom-link:hover, .custom-link[aria-expanded="true"] {
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.08);
 }
 
-/* Iconos un poco más grandes */
-.bi {
-  font-size: 1.2rem;
-  vertical-align: text-bottom;
+/* Links secundarios (submenú) */
+.sub-link {
+    color: #9ca3af;
+    font-size: 0.9rem;
+    padding: 8px 12px;
+    border-radius: 6px;
+    opacity: 0.8;
+}
+.sub-link:hover {
+    color: white;
+    background-color: rgba(255, 255, 255, 0.03);
+    opacity: 1;
+}
+
+/* ESTADO ACTIVO (Ruta actual) */
+.active-link {
+    color: #ffffff !important;
+    background: linear-gradient(90deg, rgba(13, 110, 253, 0.2) 0%, rgba(13, 110, 253, 0) 100%);
+    border-left: 3px solid #0d6efd;
+    border-radius: 0 8px 8px 0 !important;
+    opacity: 1;
+}
+.active-link i { color: #0d6efd; }
+
+/* Icono de flecha giratoria en acordeón */
+a[aria-expanded="true"] .transition-icon {
+    transform: rotate(180deg);
+}
+.transition-icon {
+    transition: transform 0.3s ease;
+}
+
+/* --- TARJETA DE USUARIO --- */
+.user-card {
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: background-color 0.2s;
+}
+.user-card:hover, .show > .user-card {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.avatar-box {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, #6610f2 0%, #520dc2 100%);
+    color: white;
+}
+
+/* Ajuste del menú desplegable de usuario */
+.dropdown-menu-dark {
+    background-color: #1f2937;
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }

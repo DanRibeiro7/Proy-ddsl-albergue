@@ -43,3 +43,4 @@ export class HabitacionService {
     return this.http.get(`${this.apiUrl}/${idHabitacion}/detalle`);
   }
 }
+  

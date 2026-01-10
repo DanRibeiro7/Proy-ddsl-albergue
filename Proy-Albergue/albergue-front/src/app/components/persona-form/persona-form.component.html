@@ -55,7 +55,7 @@
                     #tipoRef="ngModel" [class.is-invalid]="tipoRef.invalid && (tipoRef.dirty || tipoRef.touched)">
                     <option [ngValue]="1">Paciente</option>
                     <option [ngValue]="2">Estudiante</option>
-                    <!-- <option [ngValue]="3">Acompañante</option> -->
+                    <option [ngValue]="3">Acompañante</option>
                   </select>
                 </div>
               </div>
@@ -102,14 +102,34 @@
               </div>
 
               <div class="col-12">
-                <label class="form-label fw-bold small text-muted">Procedencia / Comunidad</label>
-                <div class="input-group">
-                  <span class="input-group-text bg-light border-end-0"><i
-                      class="bi bi-geo-alt text-secondary"></i></span>
-                  <input type="text" class="form-control border-start-0" [(ngModel)]="persona.procedencia"
-                    name="procedencia" placeholder="Ej: Comunidad Nativa Santa Rosa, Río Ucayali...">
-                </div>
-              </div>
+  <label class="form-label fw-bold small text-muted">Procedencia / Comunidad <span class="text-danger">*</span></label>
+  <div class="input-group">
+    <span class="input-group-text bg-light border-end-0">
+      <i class="bi bi-geo-alt text-secondary"></i>
+    </span>
+
+    <select class="form-select border-start-0" 
+            [(ngModel)]="persona.id_comunidad" 
+            name="id_comunidad"
+            required
+            #comunidadRef="ngModel"
+            [class.is-invalid]="comunidadRef.invalid && (comunidadRef.dirty || comunidadRef.touched)">
+
+      <option [ngValue]="undefined" disabled selected>-- Seleccione una comunidad --</option>
+
+      <option *ngFor="let c of listaComunidades" [ngValue]="c.id_comunidad">
+        {{ c.nombre }}
+      </option>
+
+    </select>
+    
+    <div class="invalid-feedback">Debe seleccionar una comunidad.</div>
+  </div>
+  
+  <div class="form-text text-end">
+    <small><a href="#" class="text-decoration-none">¿No encuentra la comunidad?</a></small>
+  </div>
+</div>
             </div>
 
             <div class="mt-4 p-3 bg-primary-subtle rounded border border-primary-subtle d-flex align-items-center"

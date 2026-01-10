@@ -1,7 +1,7 @@
 <div class="container mt-4">
 
-  <div *ngIf="mensajeAlerta" class="alert alert-dismissible fade show shadow-sm" 
-       [ngClass]="tipoAlerta === 'success' ? 'alert-success' : 'alert-danger'" role="alert">
+  <div *ngIf="mensajeAlerta" class="alert alert-dismissible fade show shadow-sm"
+    [ngClass]="tipoAlerta === 'success' ? 'alert-success' : 'alert-danger'" role="alert">
     <i class="bi" [ngClass]="tipoAlerta === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'"></i>
     <strong class="ms-2">{{ tipoAlerta === 'success' ? '¡Éxito!' : 'Atención:' }}</strong> {{ mensajeAlerta }}
     <button type="button" class="btn-close" (click)="mensajeAlerta = ''"></button>
@@ -24,14 +24,11 @@
             <label class="form-label">DNI / Documento <span class="text-danger">*</span></label>
             <div class="input-group">
               <input type="text" class="form-control" [(ngModel)]="persona.dni" (blur)="buscarDni()"
-                placeholder="8 dígitos" maxlength="8" (keypress)="soloNumeros($event)">
+                (input)="limpiarAlCambiarDni()" placeholder="8 dígitos" maxlength="8" (keypress)="soloNumeros($event)">
               <button class="btn btn-outline-secondary" type="button" (click)="buscarDni()">
                 <i class="bi bi-search"></i>
               </button>
             </div>
-            <small class="text-muted" *ngIf="persona.dni && persona.dni.length !== 8">
-               <span class="text-danger"><i class="bi bi-x-circle"></i> Debe tener 8 dígitos</span>
-            </small>
           </div>
 
           <div class="row">
@@ -44,31 +41,72 @@
               <input type="text" class="form-control" [(ngModel)]="persona.apellidos">
             </div>
           </div>
+          <div class="mb-3">
+            <label class="form-label">Procedencia / Comunidad</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light border-end-0">
+                <i class="bi bi-geo-alt text-secondary"></i>
+              </span>
 
+              <select class="form-select border-start-0" [(ngModel)]="persona.id_comunidad" name="id_comunidad" required
+                #comunidadRef="ngModel"
+                [class.is-invalid]="comunidadRef.invalid && (comunidadRef.dirty || comunidadRef.touched)">
+
+                <option [ngValue]="undefined" disabled selected>-- Seleccione una comunidad --</option>
+
+                <option *ngFor="let c of listaComunidades" [ngValue]="c.id_comunidad">
+                  {{ c.nombre }}
+                </option>
+              </select>
+
+              <div class="invalid-feedback">Debe seleccionar la procedencia.</div>
+            </div>
+
+            <div class="form-text text-end">
+              <small>¿No está en la lista? <a href="#" class="text-decoration-none">Gestionar Comunidades</a></small>
+            </div>
+          </div>
           <div class="mb-4">
-            <label class="form-label d-block fw-bold text-muted small">TIPO DE HUÉSPED</label>
+
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <label class="form-label fw-bold text-muted small m-0">TIPO DE HUÉSPED</label>
+
+              <span *ngIf="persona.idpersona" class="badge bg-light text-secondary border">
+                <i class="bi bi-database-lock-fill me-1"></i> Tipo registrado
+              </span>
+            </div>
+
             <div class="btn-group w-100" role="group">
-              
-              <input type="radio" class="btn-check" name="tipoPersona" id="tipoEstudiante" 
-                     [value]="2" [(ngModel)]="persona.idtipo_persona">
-              <label class="btn btn-outline-success" for="tipoEstudiante">
+
+              <input type="radio" class="btn-check" name="tipoPersona" id="tipoEstudiante" [value]="2"
+                [(ngModel)]="persona.idtipo_persona"
+                [disabled]="!!persona.idpersona || (habitacionId > 0 && tipoHabitacion === 'PACIENTE')">
+
+              <label class="btn btn-outline-success" for="tipoEstudiante" [ngClass]="{
+             'opacity-50': (persona.idpersona && persona.idtipo_persona !== 2) || (habitacionId > 0 && tipoHabitacion === 'PACIENTE')
+           }">
                 <i class="bi bi-mortarboard-fill me-2"></i> Estudiante
               </label>
-            
-              <input type="radio" class="btn-check" name="tipoPersona" id="tipoPaciente" 
-                     [value]="1" [(ngModel)]="persona.idtipo_persona">
-              <label class="btn btn-outline-primary" for="tipoPaciente">
+
+              <input type="radio" class="btn-check" name="tipoPersona" id="tipoPaciente" [value]="1"
+                [(ngModel)]="persona.idtipo_persona"
+                [disabled]="!!persona.idpersona || (habitacionId > 0 && tipoHabitacion === 'ESTUDIANTE')">
+
+              <label class="btn btn-outline-primary" for="tipoPaciente" [ngClass]="{
+             'opacity-50': (persona.idpersona && persona.idtipo_persona !== 1) || (habitacionId > 0 && tipoHabitacion === 'ESTUDIANTE')
+           }">
                 <i class="bi bi-heart-pulse-fill me-2"></i> Paciente
               </label>
 
             </div>
+
+            <small class="text-muted fst-italic mt-1 d-block" *ngIf="habitacionId > 0 && !persona.idpersona">
+              * Habitación de <strong>{{ tipoHabitacion }}</strong> seleccionada.
+            </small>
+
           </div>
 
-          <div class="mb-3">
-            <label class="form-label">Procedencia / Comunidad</label>
-            <input type="text" class="form-control" [(ngModel)]="persona.procedencia"
-              placeholder="Ej: Comunidad Nativa X">
-          </div>
+
 
           <div *ngIf="persona.idtipo_persona === 1" class="card bg-info bg-opacity-10 border-info mb-3">
             <div class="card-body">
@@ -76,11 +114,17 @@
               <div class="mb-2">
                 <label class="form-label small">Diagnóstico</label>
                 <input type="text" class="form-control form-control-sm" [(ngModel)]="datosPaciente.diagnostico">
+
               </div>
               <div class="row">
-                <div class="col-6 mb-2">
-                  <label class="form-label small">Hospital Origen</label>
-                  <input type="text" class="form-control form-control-sm" [(ngModel)]="datosPaciente.hospital">
+                <div class="col-md-6" *ngIf="persona.idtipo_persona == 1"> <label class="form-label">Centro de
+                    Salud</label>
+                  <select class="form-select" name="hospital" [(ngModel)]="persona.datosPaciente!.hospital" required>
+                    <option value="" disabled selected>-- Seleccione --</option>
+                    <option *ngFor="let hosp of listaHospitales" [value]="hosp.nombre">
+                      {{ hosp.nombre }}
+                    </option>
+                  </select>
                 </div>
                 <div class="col-6 mb-2">
                   <label class="form-label small">Código SIS</label>
@@ -93,9 +137,15 @@
           <div *ngIf="persona.idtipo_persona === 2" class="card bg-success bg-opacity-10 border-success mb-3">
             <div class="card-body">
               <h6 class="text-success fw-bold"><i class="bi bi-mortarboard"></i> Ficha Académica</h6>
-              <div class="mb-2">
-                <label class="form-label small">Institución</label>
-                <input type="text" class="form-control form-control-sm" [(ngModel)]="datosEstudiante.institucion">
+              <div class="col-md-6" *ngIf="persona.idtipo_persona == 2"> <label class="form-label">Institución
+                  Educativa</label>
+                <select class="form-select" name="institucion" [(ngModel)]="persona.datosEstudiante!.institucion"
+                  required>
+                  <option value="" disabled selected>-- Seleccione --</option>
+                  <option *ngFor="let inst of listaInstituciones" [value]="inst.nombre">
+                    {{ inst.nombre }}
+                  </option>
+                </select>
               </div>
               <div class="row">
                 <div class="col-8 mb-2">
@@ -112,8 +162,8 @@
 
           <div class="mb-3">
             <label class="form-label">Teléfono</label>
-            <input type="text" class="form-control" [(ngModel)]="persona.telefono" 
-                   maxlength="9" (keypress)="soloNumeros($event)" placeholder="Solo números">
+            <input type="text" class="form-control" [(ngModel)]="persona.telefono" maxlength="9"
+              (keypress)="soloNumeros($event)" placeholder="Solo números">
           </div>
 
         </div>
@@ -140,51 +190,57 @@
               </div>
             </div>
 
-            <div *ngIf="habitacionId === 0">
-              <select class="form-select" [(ngModel)]="seleccionManual" (change)="seleccionarHabitacionManual()">
+            <div *ngIf="habitacionId === 0 || seleccionManual"> <select class="form-select"
+                [(ngModel)]="seleccionManual" (change)="seleccionarHabitacionManual()">
                 <option value="" disabled selected>-- Seleccione Habitación --</option>
-                <optgroup label="Estudiantes">
+
+                <optgroup label="Estudiantes" *ngIf="!persona.idtipo_persona || persona.idtipo_persona === 2">
                   <option *ngFor="let h of habitacionesEstudiantes" [value]="h.idhabitacion">
-                    Hab. {{h.numero_habitacion}} (Piso {{h.piso}})
+                    Hab. {{h.numero_habitacion}} (Piso {{h.piso}}) - S/. {{h.precio}}
                   </option>
                 </optgroup>
-                <optgroup label="Pacientes">
+
+                <optgroup label="Pacientes" *ngIf="!persona.idtipo_persona || persona.idtipo_persona === 1">
                   <option *ngFor="let h of habitacionesPacientes" [value]="h.idhabitacion">
-                    Hab. {{h.numero_habitacion}} (Piso {{h.piso}})
+                    Hab. {{h.numero_habitacion}} (Piso {{h.piso}}) - S/. {{h.precio}}
                   </option>
                 </optgroup>
               </select>
+
               <small class="text-muted"
                 *ngIf="habitacionesEstudiantes.length === 0 && habitacionesPacientes.length === 0">
                 Cargando habitaciones disponibles...
               </small>
+
+              <small class="text-primary fw-bold d-block mt-1" *ngIf="persona.idtipo_persona">
+                <i class="bi bi-filter"></i> Mostrando solo habitaciones para {{ persona.idtipo_persona === 2 ?
+                'ESTUDIANTES' : 'PACIENTES' }}
+              </small>
             </div>
-          </div>
+            <div class="mb-3">
+              <label class="form-label">Fecha de Ingreso</label>
+              <input type="date" class="form-control" [(ngModel)]="fechaIngreso">
+            </div>
 
-          <div class="mb-3">
-            <label class="form-label">Fecha de Ingreso</label>
-            <input type="date" class="form-control" [(ngModel)]="fechaIngreso">
-          </div>
-
-          <div class="mb-3">
+            <!-- <div class="mb-3">
             <label class="form-label">Fecha de Salida (Estimada)</label>
             <input type="date" class="form-control" [(ngModel)]="fechaSalida">
+          </div> -->
+
+            <hr>
+
+            <div class="d-grid gap-2">
+              <button class="btn btn-success btn-lg" (click)="guardarRegistro()" [disabled]="isLoading">
+                <i class="bi bi-save"></i> {{ isLoading ? 'Guardando...' : 'Confirmar Ingreso' }}
+              </button>
+              <button class="btn btn-secondary" (click)="cancelar()">
+                Cancelar
+              </button>
+            </div>
+
           </div>
-
-          <hr>
-
-          <div class="d-grid gap-2">
-            <button class="btn btn-success btn-lg" (click)="guardarRegistro()" [disabled]="isLoading">
-              <i class="bi bi-save"></i> {{ isLoading ? 'Guardando...' : 'Confirmar Ingreso' }}
-            </button>
-            <button class="btn btn-secondary" (click)="cancelar()">
-              Cancelar
-            </button>
-          </div>
-
         </div>
       </div>
-    </div>
 
+    </div>
   </div>
-</div>

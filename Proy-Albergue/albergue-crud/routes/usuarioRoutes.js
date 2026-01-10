@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 
-// ✅ IMPORTAR AMBOS MIDDLEWARES
 const { verificarToken, soloAdmin } = require('../middleware/auth.middleware');
 
 const {
@@ -11,7 +10,6 @@ const {
   cambiarEstado
 } = require('../controllers/usuarioController');
 
-// 🔐 Rutas protegidas SOLO ADMIN
 router.get('/', listarUsuarios);
 router.post('/', crearUsuario);
 router.put('/:id', actualizarUsuario);

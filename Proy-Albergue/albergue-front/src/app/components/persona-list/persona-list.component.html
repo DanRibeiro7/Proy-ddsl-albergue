@@ -47,52 +47,74 @@
                 <div class="d-flex align-items-center">
                   <div
                     class="avatar-circle me-3 d-flex justify-content-center align-items-center fw-bold text-white shadow-sm"
-                    [ngClass]="p.idtipo_persona === 2 ? 'bg-success' : 'bg-primary'"
-                    style="width: 45px; height: 45px; border-radius: 50%; font-size: 1.2rem;">
+                    [ngClass]="{
+    'bg-primary': p.idtipo_persona === 1,      
+    'bg-success': p.idtipo_persona === 2,        
+    'bg-warning': p.idtipo_persona === 3      
+  }" style="width: 45px; height: 45px; border-radius: 50%; font-size: 1.2rem;">
                     {{ p.nombres.charAt(0) }}
                   </div>
+
                   <div>
                     <h5 class="mb-0 fw-bold text-dark">{{ p.nombres }} {{ p.apellidos }}</h5>
                     <small class="text-muted" *ngIf="p.idtipo_persona === 1">Paciente SIS</small>
                     <small class="text-muted" *ngIf="p.idtipo_persona === 2">Estudiante</small>
+                    <small class="text-muted" *ngIf="p.idtipo_persona === 3">Acompañante</small>
                   </div>
                 </div>
               </td>
 
               <td><span class="fw-bold fs-6 text-dark">{{ p.dni }}</span></td>
 
-              <td class="fs-6 text-secondary">{{ p.procedencia || '-' }}</td>
+              <td class="fs-6 text-secondary">{{ p.nombre_comunidad || '-' }}</td>
 
               <td class="fs-6 text-secondary">{{ p.telefono || '-' }}</td>
 
               <td>
-                <span class="badge rounded-pill px-3 py-2"
-                  [ngClass]="p.idtipo_persona === 2 ? 'bg-success-subtle text-success' : 'bg-primary-subtle text-primary'">
-                  {{ p.idtipo_persona === 2 ? 'ESTUDIANTE' : 'PACIENTE' }}
+                <span class="badge rounded-pill px-3 py-2" [ngClass]="{
+    'bg-success-subtle text-success': p.idtipo_persona === 2,
+    'bg-primary-subtle text-primary': p.idtipo_persona === 1,
+    'bg-warning-subtle text-secondary': p.idtipo_persona === 3
+  }">
+                  {{
+                  p.idtipo_persona === 2
+                  ? 'ESTUDIANTE'
+                  : p.idtipo_persona === 3
+                  ? 'ACOMPAÑANTE'
+                  : 'PACIENTE'
+                  }}
                 </span>
+
               </td>
 
               <td class="text-end pe-4">
-                <div class="btn-group shadow-sm">
-                  <button class="btn btn-outline-secondary px-3" (click)="verFicha(p)" data-bs-toggle="modal"
-                    data-bs-target="#modalFicha" title="Ver Ficha">
-                    <i class="bi bi-eye fs-5"></i>
-                  </button>
+  <div class="btn-group shadow-sm">
+    
+    <button class="btn btn-outline-secondary px-3" (click)="verFicha(p)" data-bs-toggle="modal"
+      data-bs-target="#modalFicha" title="Ver Ficha">
+      <i class="bi bi-eye fs-5"></i>
+    </button>
 
-                  <button class="btn btn-outline-success px-3" (click)="irAHospedar(p.dni)" title="Hospedar">
-                    <i class="bi bi-box-arrow-in-right fs-5"></i>
-                  </button>
+    <button class="btn btn-outline-success px-3" 
+            (click)="irAHospedar(p.dni)" 
+            title="Hospedar"
+            [disabled]="p.idtipo_persona === 3 || p.es_hospedado === 1">
+      <i class="bi bi-box-arrow-in-right fs-5"></i>
+    </button>
 
-                  <button class="btn btn-outline-primary px-3" [routerLink]="['/personas/editar', p.idpersona]"
-                    title="Editar">
-                    <i class="bi bi-pencil fs-5"></i>
-                  </button>
+    <button class="btn btn-outline-primary px-3" [routerLink]="['/personas/editar', p.idpersona]"
+      title="Editar">
+      <i class="bi bi-pencil fs-5"></i>
+    </button>
 
-                  <button class="btn btn-outline-danger px-3" (click)="eliminarPersona(p.idpersona!)" title="Eliminar">
-                    <i class="bi bi-trash fs-5"></i>
-                  </button>
-                </div>
-              </td>
+    <button class="btn btn-outline-danger px-3" 
+        (click)="eliminarPersona(p)" 
+        title="Eliminar"
+        [disabled]="(p.es_hospedado || 0) > 0"> <i class="bi bi-trash fs-5"></i>
+</button>
+    
+  </div>
+</td>
             </tr>
           </tbody>
         </table>
@@ -181,8 +203,8 @@
           <div class="col-12">
             <small class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">Procedencia</small>
             <div class="fs-5 text-dark">
-              <i class="bi bi-geo-alt-fill text-danger me-1"></i> {{ personaSeleccionada.procedencia || 'No registrada'
-              }}
+              <i class="bi bi-geo-alt-fill text-danger me-1"></i> {{ personaSeleccionada.nombre_comunidad || 'No
+              registrada' }}
             </div>
           </div>
 

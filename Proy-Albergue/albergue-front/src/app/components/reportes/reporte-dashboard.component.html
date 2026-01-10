@@ -1,105 +1,199 @@
-<div class="container-fluid p-4">
-  <h2 class="mb-4 fw-bold text-primary">📊 Dashboard de Operaciones</h2>
-
-  <div class="row g-4 mb-5">
-    
-    <div class="col-md-3">
-      <div class="card border-0 shadow-sm h-100 bg-primary text-white">
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h6 class="text-uppercase mb-0">Hospedados Hoy</h6>
-              <h2 class="display-4 fw-bold my-2">{{ totalActivos }}</h2>
-              <small class="text-white-50">Personas en albergue</small>
-            </div>
-            <i class="bi bi-people-fill fs-1 opacity-50"></i>
-          </div>
-        </div>
-      </div>
+<div class="container-fluid p-4 dashboard-container">
+  
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="fw-bold text-dark mb-0">Dashboard Operativo</h2>
+      <small class="text-muted">Resumen en tiempo real del Albergue</small>
     </div>
-
-    <div class="col-md-3">
-      <div class="card border-0 shadow-sm h-100 bg-success text-white">
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h6 class="text-uppercase mb-0">Camas Libres</h6>
-              <h2 class="display-4 fw-bold my-2">{{ camasDisponibles }}</h2>
-              <small class="text-white-50">De {{ totalCamas }} totales</small>
-            </div>
-            <i class="bi bi-door-open-fill fs-1 opacity-50"></i>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-6">
-      <div class="card border-0 shadow-sm h-100">
-        <div class="card-body">
-          <h6 class="text-muted text-uppercase mb-3">Distribución por Tipo</h6>
-          <div class="d-flex justify-content-around text-center">
-            <div *ngFor="let item of dataPorTipo">
-              <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2" 
-                   [ngClass]="{'bg-info bg-opacity-10 text-info': item.nombre === 'ESTUDIANTE', 'bg-warning bg-opacity-10 text-warning': item.nombre === 'PACIENTE'}"
-                   style="width: 60px; height: 60px;">
-                <i class="bi fs-3" 
-                   [ngClass]="{'bi-mortarboard-fill': item.nombre === 'ESTUDIANTE', 'bi-heart-pulse-fill': item.nombre === 'PACIENTE'}"></i>
-              </div>
-              <h4 class="fw-bold mb-0">{{ item.cantidad }}</h4>
-              <small class="text-muted">{{ item.nombre }}s</small>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div class="text-end">
+      <span class="badge bg-white text-secondary border px-3 py-2 shadow-sm">
+        <i class="bi bi-calendar-event me-2"></i> {{ fechaActual | date:'fullDate' }}
+      </span>
     </div>
   </div>
 
-  <div class="row">
-    <div class="col-md-8">
-      <div class="card border-0 shadow-sm">
-        <div class="card-header bg-white border-0 py-3">
-          <h5 class="mb-0 fw-bold"><i class="bi bi-geo-alt-fill text-danger me-2"></i>Top Comunidades de Origen</h5>
+  <div class="row g-4 mb-4">
+    
+    <div class="col-12 col-md-6 col-xl-3">
+      <div class="card h-100 bg-gradient-primary text-white border-0">
+        <div class="card-body position-relative p-4">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <h6 class="text-uppercase mb-1 opacity-75 fw-bold" style="font-size: 0.85rem;">Total Hospedados</h6>
+              <h2 class="display-4 fw-bold mb-0">{{ totalActivos }}</h2>
+              <small class="text-white-50">Personas</small>
+            </div>
+          </div>
+          <i class="bi bi-people-fill card-icon-bg"></i>
         </div>
-        <div class="card-body">
-          <div class="table-responsive">
-            <table class="table table-hover align-middle">
-              <thead class="table-light">
-                <tr>
-                  <th>Comunidad / Procedencia</th>
-                  <th class="text-end">Cantidad de Personas</th>
-                  <th style="width: 40%;">Barra</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let lugar of topLugares">
-                  <td class="fw-bold">{{ lugar.procedencia }}</td>
-                  <td class="text-end">{{ lugar.cantidad }}</td>
-                  <td>
-                    <div class="progress" style="height: 8px;">
-                      <div class="progress-bar bg-danger" 
-                           role="progressbar" 
-                           [style.width.%]="(lugar.cantidad / totalActivos) * 100"></div>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+      <div class="card h-100 bg-gradient-success text-white border-0">
+        <div class="card-body position-relative p-4">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <h6 class="text-uppercase mb-1 opacity-75 fw-bold" style="font-size: 0.85rem;">Disponibilidad</h6>
+              <h2 class="display-4 fw-bold mb-0">{{ camasDisponibles }}</h2>
+              <small class="text-white-50">Camas libres de {{ totalCamas }}</small>
+            </div>
+          </div>
+          <i class="bi bi-door-open-fill card-icon-bg"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-3">
+      <div class="card h-100 border-0">
+        <div class="card-body text-center d-flex flex-column justify-content-center p-3">
+          <h6 class="text-muted text-uppercase mb-2" style="font-size: 0.8rem; font-weight: 700;">Tasa de Ocupación</h6>
+          
+          <div class="position-relative d-inline-block mx-auto">
+            <svg viewBox="0 0 36 36" class="circular-chart" style="width: 80px; height: 80px;">
+              <path class="circle-bg"
+                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                fill="none" stroke="#eee" stroke-width="3" />
+              <path class="circle"
+                [attr.stroke-dasharray]="porcentajeOcupacion + ', 100'"
+                [style.stroke]="porcentajeOcupacion > 90 ? '#dc3545' : (porcentajeOcupacion > 70 ? '#ffc107' : '#4e54c8')"
+                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                fill="none" stroke-width="3" stroke-linecap="round" />
+            </svg>
+            <div class="position-absolute top-50 start-50 translate-middle">
+              <span class="fs-5 fw-bold text-dark">{{ porcentajeOcupacion }}%</span>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="col-md-4">
-      <div class="card border-0 shadow-sm bg-dark text-white">
-        <div class="card-body p-4 text-center">
-          <i class="bi bi-printer-fill fs-1 mb-3 text-secondary"></i>
-          <h5>Exportar Datos</h5>
-          <p class="text-white-50 mb-4">Descarga el reporte detallado en Excel para la municipalidad.</p>
-          <button class="btn btn-light w-100 fw-bold text-dark">
-            <i class="bi bi-file-earmark-spreadsheet me-2"></i>Descargar Excel
-          </button>
+    <div class="col-12 col-md-6 col-xl-3">
+      <div class="card h-100 bg-gradient-warning text-dark border-0">
+        <div class="card-body position-relative p-4">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h6 class="fw-bold m-0 text-uppercase opacity-75" style="font-size: 0.85rem;">Menús a Preparar</h6>
+            <span class="badge bg-dark bg-opacity-10 text-dark rounded-pill" style="font-size: 0.7rem;">+6 Staff</span>
+          </div>
+          
+          <div class="text-center mt-2">
+            <h1 class="display-2 fw-bolder mb-0" style="letter-spacing: -2px;">{{ totalRaciones }}</h1>
+            <small class="fw-bold opacity-75">Raciones Totales</small>
+          </div>
+          <i class="bi bi-fire card-icon-bg text-dark"></i>
         </div>
       </div>
     </div>
+
+  </div>
+
+  <div class="row g-4">
+    
+    <div class="col-12 col-xl-8">
+      <div class="row g-4">
+        
+        <div class="col-12">
+          <div class="card border-0 h-100">
+            <div class="card-header bg-white border-0 py-3">
+              <h6 class="mb-0 fw-bold text-secondary text-uppercase"><i class="bi bi-pie-chart-fill me-2"></i>Población por Tipo</h6>
+            </div>
+            <div class="card-body">
+              <div class="row text-center g-3">
+                <div class="col" *ngFor="let item of dataPorTipo">
+                  <div class="p-3 rounded-3 border border-light bg-light h-100 d-flex flex-column align-items-center justify-content-center hover-lift">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center mb-2" 
+                         [ngClass]="{
+                           'bg-info bg-opacity-10 text-info': item.nombre === 'ESTUDIANTE', 
+                           'bg-warning bg-opacity-10 text-warning': item.nombre === 'PACIENTE',
+                           'bg-success bg-opacity-10 text-success': item.nombre === 'ACOMPAÑANTE'
+                         }"
+                         style="width: 50px; height: 50px;">
+                      <i class="bi fs-4" 
+                         [ngClass]="{
+                           'bi-mortarboard-fill': item.nombre === 'ESTUDIANTE', 
+                           'bi-heart-pulse-fill': item.nombre === 'PACIENTE',
+                           'bi-people-fill': item.nombre === 'ACOMPAÑANTE'
+                         }"></i>
+                    </div>
+                    <h3 class="fw-bold mb-0 text-dark">{{ item.cantidad }}</h3>
+                    <small class="text-muted text-uppercase fw-bold" style="font-size: 0.7rem;">{{ item.nombre }}</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12">
+          <div class="card border-0 h-100">
+            <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+              <h6 class="mb-0 fw-bold text-secondary text-uppercase"><i class="bi bi-geo-alt-fill me-2"></i>Top Procedencias</h6>
+              <button class="btn btn-sm btn-light rounded-circle"><i class="bi bi-three-dots"></i></button>
+            </div>
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                  <thead class="bg-light text-secondary">
+                    <tr>
+                      <th class="ps-4 text-uppercase small border-0">Comunidad</th>
+                      <th class="text-end text-uppercase small border-0">Cantidad</th>
+                      <th class="pe-4 text-uppercase small border-0" style="width: 35%;">Porcentaje</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let lugar of topLugares">
+                      <td class="ps-4 fw-bold text-dark">{{ lugar.procedencia }}</td>
+                      <td class="text-end fw-bold">{{ lugar.cantidad }}</td>
+                      <td class="pe-4">
+                        <div class="progress" style="height: 6px; background-color: #f0f2f5;">
+                          <div class="progress-bar bg-gradient-primary" 
+                               role="progressbar" 
+                               [style.width.%]="(lugar.cantidad / totalActivos) * 100"></div>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="col-12 col-xl-4">
+      <div class="card border-0 h-100">
+        <div class="card-header bg-white border-0 py-3">
+          <h6 class="mb-0 fw-bold text-secondary text-uppercase"><i class="bi bi-hourglass-split me-2"></i>Estadías Largas</h6>
+        </div>
+        <div class="card-body p-0">
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item d-flex justify-content-between align-items-center py-3" *ngFor="let p of listaEstadias">
+              <div class="d-flex align-items-center">
+                <div class="avatar-initials bg-light text-primary fw-bold rounded-circle me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                  {{ p.nombres.charAt(0) }}
+                </div>
+                <div>
+                  <div class="fw-bold text-dark mb-0 lh-1">{{ p.nombres }} {{ p.apellidos }}</div>
+                  <small class="text-muted" style="font-size: 0.75rem;">Ingreso: {{ p.fecha_ingreso | date:'dd MMM yyyy' }}</small>
+                </div>
+              </div>
+              <span class="badge badge-pill-custom" 
+                    [ngClass]="p.dias_estadia > 30 ? 'bg-danger-subtle text-danger' : 'bg-warning-subtle text-warning'">
+                {{ p.dias_estadia }} días
+              </span>
+            </li>
+          </ul>
+          
+          <div *ngIf="listaEstadias.length === 0" class="text-center p-4 text-muted">
+            <i class="bi bi-check-circle fs-1 text-success opacity-50"></i>
+            <p class="mt-2 mb-0 small">No hay estadías prolongadas.</p>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>

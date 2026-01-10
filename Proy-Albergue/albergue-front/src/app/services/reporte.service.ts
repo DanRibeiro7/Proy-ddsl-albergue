@@ -9,7 +9,6 @@ import { environment } from '../environment/environment';
 })
 export class ReporteService {
 
-  // Asegúrate de usar backticks (``) para que funcione el ${}
   private apiUrl = `${environment.apiUrl}/reportes`;
 
   constructor(
@@ -24,8 +23,6 @@ export class ReporteService {
       })
     };
   }
-
-  // --- MÉTODOS DEL DASHBOARD ---
 
   obtenerTotal() {
     return this.http.get<any>(`${this.apiUrl}/total`, this.headers());
@@ -42,4 +39,7 @@ export class ReporteService {
   obtenerEstadoHabitaciones() {
     return this.http.get<any>(`${this.apiUrl}/habitaciones-estado`, this.headers());
   }
+  obtenerEstadiasProlongadas() {
+  return this.http.get(`${this.apiUrl}/estadias-prolongadas`);
+}
 }

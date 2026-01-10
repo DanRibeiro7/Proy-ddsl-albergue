@@ -46,9 +46,15 @@
     </div>
 
     <button class="btn btn-primary w-100 py-2 rounded-pill fw-bold shadow-sm mb-3 scale-hover" 
-            (click)="login()">
-      INGRESAR <i class="bi bi-box-arrow-in-right ms-2"></i>
-    </button>
+        (click)="login()"
+        [disabled]="isLoading"> <span *ngIf="!isLoading">INGRESAR <i class="bi bi-box-arrow-in-right ms-2"></i></span>
+  
+  <span *ngIf="isLoading">
+    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+    Verificando...
+  </span>
+
+</button>
 
     <div class="text-center mt-3">
       <small class="text-muted">Municipalidad Distrital de Yurúa &copy; 2026</small>

@@ -15,7 +15,7 @@ const obtenerRegistros = async (req, res) => {
             FROM registro r
             INNER JOIN persona p ON r.idpersona = p.idpersona
             INNER JOIN habitacion h ON r.idhabitacion = h.idhabitacion
-            ORDER BY r.fecha_ingreso DESC
+            ORDER BY r.idregistro DESC
         `;
 
         const [registros] = await db.query(sql);
@@ -37,9 +37,8 @@ const obtenerRegistros = async (req, res) => {
 const registrarIngreso = async (req, res) => {
     try {
         const { idpersona, idhabitacion, fecha_ingreso } = req.body;
-        const connection = await db.getConnection(); // Usamos conexión para transacciones si fuera necesario
+        const connection = await db.getConnection(); 
 
-        // 1. VALIDACIÓN NUEVA: ¿Esta persona ya vive aquí?
         const [[huespedActivo]] = await connection.query(
             "SELECT r.idhabitacion, h.numero_habitacion FROM registro r JOIN habitacion h ON r.idhabitacion = h.idhabitacion WHERE r.idpersona = ? AND r.estado = 'ACTIVO'",
             [idpersona]
@@ -53,7 +52,6 @@ const registrarIngreso = async (req, res) => {
             });
         }
 
-        // 2. Validar capacidad de la habitación (Código que ya tenías)
         const [[hab]] = await connection.query(
             'SELECT capacidad FROM habitacion WHERE idhabitacion = ?',
             [idhabitacion]
@@ -69,13 +67,11 @@ const registrarIngreso = async (req, res) => {
             return res.status(400).json({ success: false, mensaje: 'Habitación sin cupos disponibles' });
         }
 
-        // 3. Insertar registro
         await connection.query(
             "INSERT INTO registro(idpersona, idhabitacion, fecha_ingreso, estado) VALUES (?, ?, ?, 'ACTIVO')",
             [idpersona, idhabitacion, fecha_ingreso]
         );
 
-        // 4. Actualizar estado habitación
         await connection.query(
             "UPDATE habitacion SET estado='OCUPADA' WHERE idhabitacion=?",
             [idhabitacion]
@@ -90,7 +86,6 @@ const registrarIngreso = async (req, res) => {
     }
 };
 
-// Registrar salida
 const registrarSalida = async (req, res) => {
     try {
         const { idregistro, fecha_salida } = req.body;
@@ -111,7 +106,6 @@ const registrarSalida = async (req, res) => {
             [fecha_salida, idregistro]
         );
 
-        // Verificar si quedan personas en la habitación
         const [[restantes]] = await db.query(
             `SELECT COUNT(*) total
              FROM registro
@@ -119,7 +113,6 @@ const registrarSalida = async (req, res) => {
             [registro.idhabitacion]
         );
 
-        // Si ya no queda nadie, liberamos la habitación
         if (restantes.total === 0) {
             await db.query(
                 `UPDATE habitacion SET estado='DISPONIBLE'
@@ -142,7 +135,6 @@ const registrarSalida = async (req, res) => {
     }
 };
 
-// Reporte total albergados activos
 const totalAlbergados = async (req, res) => {
     try {
         const [[total]] = await db.query(
@@ -167,7 +159,6 @@ const liberarPorHabitacion = async (req, res) => {
     try {
         const { idhabitacion } = req.params;
 
-        // 1. Buscamos cuál es el registro ACTIVO de esa habitación
         const [registros] = await db.query(
             "SELECT idregistro FROM registro WHERE idhabitacion = ? AND estado = 'ACTIVO'",
             [idhabitacion]
@@ -181,15 +172,13 @@ const liberarPorHabitacion = async (req, res) => {
         }
 
         const idregistro = registros[0].idregistro;
-        const fechaSalida = new Date(); // Fecha y hora actual
+        const fechaSalida = new Date(); 
 
-        // 2. Cerramos ese registro (Ponemos fecha salida y estado FINALIZADO)
         await db.query(
             "UPDATE registro SET fecha_salida = ?, estado = 'FINALIZADO' WHERE idregistro = ?",
             [fechaSalida, idregistro]
         );
 
-        // 3. Liberamos la habitación (La ponemos en verde/DISPONIBLE)
         await db.query(
             "UPDATE habitacion SET estado = 'DISPONIBLE' WHERE idhabitacion = ?",
             [idhabitacion]
@@ -211,27 +200,36 @@ const liberarPorHabitacion = async (req, res) => {
 const obtenerRegistroPorId = async (req, res) => {
     try {
         const { id } = req.params;
-        const connection = await db.getConnection();
-
+        
         const sql = `
             SELECT 
-                r.idregistro, r.fecha_ingreso, r.fecha_salida, r.estado,
-                p.nombres, p.apellidos, p.dni, p.telefono, p.procedencia, p.idtipo_persona,
-                h.numero_habitacion, h.piso, h.tipo as tipo_habitacion,
-                -- Datos Estudiante
+                r.*, 
+                h.numero_habitacion, h.piso, h.tipo AS tipo_habitacion,
+                p.nombres, p.apellidos, p.dni, p.telefono, p.idtipo_persona,
+                
+                -- CAMBIO: Nombre de la comunidad
+                c.nombre AS nombre_comunidad, 
+                
+                -- Datos de Estudiante
                 fe.institucion, fe.carrera, fe.ciclo_actual,
-                -- Datos Paciente
+                -- Datos de Paciente
                 fp.diagnostico, fp.hospital_origen, fp.codigo_sis
+            
             FROM registro r
-            INNER JOIN persona p ON r.idpersona = p.idpersona
-            INNER JOIN habitacion h ON r.idhabitacion = h.idhabitacion
+            JOIN habitacion h ON r.idhabitacion = h.idhabitacion
+            JOIN persona p ON r.idpersona = p.idpersona
+            
+            -- JOIN CORREGIDO: Tabla 'comunidad_nativa' y campo 'id_comunidad'
+            LEFT JOIN comunidad_nativa c ON p.id_comunidad = c.id_comunidad 
+            
             LEFT JOIN ficha_estudiante fe ON p.idpersona = fe.idpersona
             LEFT JOIN ficha_paciente fp ON p.idpersona = fp.idpersona
+            
             WHERE r.idregistro = ?
         `;
 
-        const [rows] = await connection.query(sql, [id]);
-        connection.release();
+       
+        const [rows] = await db.query(sql, [id]);
 
         if (rows.length === 0) {
             return res.status(404).json({ success: false, mensaje: 'Registro no encontrado' });

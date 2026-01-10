@@ -4,10 +4,15 @@ export interface Persona {
     nombres: string;
     apellidos: string;
     telefono?: string;
-    procedencia?: string;
+    
+    id_comunidad?: number; 
+    
+    
+    nombre_comunidad?: string; 
+    es_hospedado?: number;    
+
     idtipo_persona?: number;
     
-    // === NUEVOS CAMPOS (Vienen del listado con JOIN) ===
     institucion?: string;
     carrera?: string;
     ciclo_actual?: string;
@@ -16,7 +21,6 @@ export interface Persona {
     hospital_origen?: string;
     codigo_sis?: string;
 
-    // === TUS OBJETOS PARA GUARDAR (Déjalos como estaban) ===
     datosPaciente?: {
         diagnostico: string;
         hospital: string;
@@ -28,6 +32,7 @@ export interface Persona {
         ciclo: string;
     };
 }
+
 
 export interface Registro {
     idregistro?: number;

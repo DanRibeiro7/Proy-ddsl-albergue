@@ -149,7 +149,10 @@
                   [ngClass]="registroSeleccionado.idtipo_persona === 2 ? 'bg-success-subtle text-success' : 'bg-info-subtle text-info-emphasis'">
               {{ registroSeleccionado.idtipo_persona === 2 ? 'Estudiante' : 'Paciente' }}
             </span>
-            <span class="text-muted small"><i class="bi bi-geo-alt-fill"></i> {{ registroSeleccionado.procedencia }}</span>
+            <span class="text-muted small">
+  <i class="bi bi-geo-alt-fill text-danger me-1"></i> 
+  {{ registroSeleccionado.nombre_comunidad || 'Sin comunidad' }}
+</span>
           </div>
           <div class="col-md-4 text-md-end mt-3 mt-md-0">
             <div class="border rounded p-2 text-center bg-light">

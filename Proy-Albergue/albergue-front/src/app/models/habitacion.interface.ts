@@ -5,8 +5,9 @@ export interface Habitacion {
     tipo?: 'PACIENTE' | 'ESTUDIANTE';
     capacidad?: number;
     estado?: 'DISPONIBLE' | 'OCUPADA' | 'MANTENIMIENTO';
-    nombre_huesped?: string; // Vendrá del backend
+    nombre_huesped?: string; 
     fecha_ingreso?: string;
+    precio?: number;
 }
 
 export interface HabitacionResponse {

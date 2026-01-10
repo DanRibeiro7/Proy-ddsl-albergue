@@ -1,43 +1,128 @@
-/* EFECTO DE HOVER EN TARJETAS */
+/* --- ESTILOS GENERALES --- */
+.dashboard-container {
+    background-color: #f8f9fa;
+    min-height: 100vh;
+}
+
+h2 {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    letter-spacing: -0.5px;
+    color: #2c3e50;
+}
+
+/* --- TARJETAS (CARDS) --- */
 .card {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    border-radius: 15px;
-    overflow: hidden; /* Para que el borde redondeado corte el fondo */
+    border: none;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    overflow: hidden;
+    position: relative;
 }
 
 .card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
 }
 
-/* DEGRADADOS PARA LAS TARJETAS PRINCIPALES */
-.bg-primary {
-    background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%) !important;
+/* --- TARJETAS DE COLORES (KPIs) --- */
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #4e54c8 0%, #8f94fb 100%);
 }
 
-.bg-success {
-    background: linear-gradient(135deg, #198754 0%, #157347 100%) !important;
+.bg-gradient-success {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
 }
 
-/* CIRCULOS DE ICONOS */
-.rounded-circle {
-    transition: all 0.3s ease;
+.bg-gradient-warning {
+    background: linear-gradient(135deg, #fce38a 0%, #f38181 100%);
 }
 
-.card:hover .rounded-circle {
-    transform: scale(1.1);
+.text-white-50 {
+    color: rgba(255, 255, 255, 0.8) !important;
 }
 
-/* TABLA ELEGANTE */
+/* Icono decorativo gigante de fondo */
+.card-icon-bg {
+    position: absolute;
+    right: -10px;
+    bottom: -10px;
+    font-size: 5rem;
+    opacity: 0.15;
+    transform: rotate(-15deg);
+    transition: transform 0.3s ease;
+    pointer-events: none;
+}
+
+.card:hover .card-icon-bg {
+    transform: rotate(0deg) scale(1.1);
+    opacity: 0.2;
+}
+
+/* --- GRÁFICOS Y ESTADÍSTICAS --- */
+.circular-chart {
+    display: block;
+    margin: 10px auto;
+    max-width: 80%;
+    max-height: 250px;
+}
+
+.circle-bg {
+    fill: none;
+    stroke: #eee;
+    stroke-width: 2.5;
+}
+
+.circle {
+    fill: none;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    animation: progress 1s ease-out forwards;
+    transition: stroke-dasharray 0.5s ease;
+}
+
+@keyframes progress {
+    0% { stroke-dasharray: 0 100; }
+}
+
+.percentage-text {
+    font-family: sans-serif;
+    font-weight: bold;
+    font-size: 0.5em;
+    text-anchor: middle;
+    fill: #333;
+}
+
+/* --- TABLAS --- */
+.table-hover tbody tr {
+    transition: background-color 0.2s;
+}
+
 .table-hover tbody tr:hover {
-    background-color: #f8f9fa;
-    transform: scale(1.01);
-    transition: 0.2s;
+    background-color: #f1f3f5;
 }
 
-/* RESPONSIVE */
-@media (max-width: 768px) {
-    .display-4 {
-        font-size: 2.5rem;
-    }
+.progress {
+    background-color: #e9ecef;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+/* --- LISTAS --- */
+.list-group-item {
+    border: none;
+    border-bottom: 1px solid #f0f0f0;
+    padding: 1rem 1.25rem;
+}
+
+.list-group-item:last-child {
+    border-bottom: none;
+}
+
+/* --- BADGES --- */
+.badge-pill-custom {
+    padding: 0.5em 1em;
+    font-weight: 600;
+    border-radius: 50rem;
 }

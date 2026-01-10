@@ -1,24 +1,41 @@
 const db = require('../config/database');
-//tu viejo hilario
-// 1. Obtener todas las personas
+
 const obtenerPersonas = async (req, res) => {
     try {
-        // MODIFICAMOS LA SQL PARA TRAER TODO DE UNA VEZ
-        const [personas] = await db.query(`
+        const sql = `
             SELECT 
                 p.*, 
                 tp.nombre AS tipoPersona,
+                c.nombre AS nombre_comunidad,
+                
+                -- CAMPO CALCULADO: Sumamos si es Titular + si es Acompañante
+                (
+                    -- 1. Verificar si es Titular Activo
+                    (SELECT COUNT(*) FROM registro r 
+                     WHERE r.idpersona = p.idpersona AND r.estado = 'ACTIVO') 
+                    +
+                    -- 2. Verificar si es Acompañante Activo (vinculado a un registro activo)
+                    (SELECT COUNT(*) FROM acompanante a
+                     INNER JOIN registro r2 ON a.idregistro = r2.idregistro
+                     WHERE a.idpersona = p.idpersona AND a.estado = 'ACTIVO' AND r2.estado = 'ACTIVO')
+                ) AS es_hospedado,
+
+                -- Datos de Estudiante
                 fe.institucion, fe.carrera, fe.ciclo_actual,
+                -- Datos de Paciente
                 fp.diagnostico, fp.hospital_origen, fp.codigo_sis
+
             FROM persona p
             INNER JOIN tipo_persona tp ON p.idtipo_persona = tp.idtipo_persona
+            LEFT JOIN comunidad_nativa c ON p.id_comunidad = c.id_comunidad
             LEFT JOIN ficha_estudiante fe ON p.idpersona = fe.idpersona
             LEFT JOIN ficha_paciente fp ON p.idpersona = fp.idpersona
             
-            WHERE p.estado = 'ACTIVO'  -- <--- AGREGA ESTA LÍNEA
-            
+            WHERE p.estado = 'ACTIVO'
             ORDER BY p.idpersona DESC
-        `);
+        `;
+
+        const [personas] = await db.query(sql);
 
         res.json({
             success: true,
@@ -26,15 +43,10 @@ const obtenerPersonas = async (req, res) => {
             data: personas
         });
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            mensaje: "Error al obtener personas",
-            error: error.message
-        });
+        res.status(500).json({ success: false, mensaje: "Error", error: error.message });
     }
-};
+};  
 
-// 2. Obtener persona por ID
 const obtenerPersonaPorId = async (req, res) => {
     try {
         const { id } = req.params;
@@ -64,7 +76,7 @@ const obtenerPersonaPorId = async (req, res) => {
         });
     }
 };
-// 3. Crear Persona (CORREGIDO: Valida duplicados)
+
 const crearPersona = async (req, res) => {
     const connection = await db.getConnection();
     
@@ -72,20 +84,19 @@ const crearPersona = async (req, res) => {
         await connection.beginTransaction(); 
 
         const { 
-            dni, nombres, apellidos, telefono, procedencia, idtipo_persona,
+            dni, nombres, apellidos, telefono, id_comunidad, idtipo_persona,
             datosPaciente, datosEstudiante 
         } = req.body;
 
-        // 1. Validaciones básicas
         if (!dni || !nombres || !apellidos) {
             throw new Error("Faltan datos obligatorios");
         }
 
-        // 2. VALIDACIÓN DE UNICIDAD (CAMBIO IMPORTANTE AQUÍ)
+
         const [existente] = await connection.query('SELECT idpersona FROM persona WHERE dni = ?', [dni]);
         
         if (existente.length > 0) {
-            // Si ya existe, NO actualizamos. Cancelamos y devolvemos error.
+ 
             await connection.rollback();
             connection.release();
             return res.status(400).json({ 
@@ -94,14 +105,12 @@ const crearPersona = async (req, res) => {
             });
         }
 
-        // 3. Insertar Persona (Solo si no existe)
         const [result] = await connection.query(
-            `INSERT INTO persona (dni, nombres, apellidos, telefono, procedencia, idtipo_persona) VALUES (?, ?, ?, ?, ?, ?)`,
-            [dni, nombres, apellidos, telefono, procedencia, idtipo_persona]
+            `INSERT INTO persona (dni, nombres, apellidos, telefono, id_comunidad, idtipo_persona) VALUES (?, ?, ?, ?, ?, ?)`,
+            [dni, nombres, apellidos, telefono, id_comunidad, idtipo_persona]
         );
         const idPersonaFinal = result.insertId;
 
-        // 4. Guardar Ficha Específica
         if (idtipo_persona == 1 && datosPaciente) {
             await connection.query(
                 `INSERT INTO ficha_paciente (idpersona, diagnostico, hospital_origen, codigo_sis) 
@@ -132,29 +141,27 @@ const crearPersona = async (req, res) => {
             await connection.rollback();
             connection.release();
         }
-        // Enviamos el mensaje de error al frontend
+
         res.status(500).json({ 
             success: false, 
             mensaje: error.message || "Error interno del servidor"
         });
     }
 };
-// 4. Actualizar persona (Endpoint explícito PUT)
-// personaController.js
 
 const actualizarPersona = async (req, res) => {
-    const connection = await db.getConnection(); // Usamos transacción
+    const connection = await db.getConnection(); 
     
     try {
         await connection.beginTransaction();
 
-        const { id } = req.params; // ID de la persona
+        const { id } = req.params;
         const { 
-            dni, nombres, apellidos, telefono, procedencia, idtipo_persona, 
-            datosPaciente, datosEstudiante // <--- IMPORTANTE: Recibir estos datos
+            dni, nombres, apellidos, telefono, id_comunidad, idtipo_persona, 
+            datosPaciente, datosEstudiante
         } = req.body;
 
-        // 1. Verificar si existe
+
         const [personaExistente] = await connection.query('SELECT idpersona FROM persona WHERE idpersona = ?', [id]);
 
         if (personaExistente.length === 0) {
@@ -163,17 +170,13 @@ const actualizarPersona = async (req, res) => {
             return res.status(404).json({ success: false, mensaje: "Persona no encontrada" });
         }
 
-        // 2. Actualizar datos básicos
         await connection.query(
             `UPDATE persona
-             SET dni=?, nombres=?, apellidos=?, telefono=?, procedencia=?, idtipo_persona=?
+             SET dni=?, nombres=?, apellidos=?, telefono=?, id_comunidad=?, idtipo_persona=?
              WHERE idpersona=?`,
-            [dni, nombres, apellidos, telefono, procedencia, idtipo_persona, id]
+            [dni, nombres, apellidos, telefono, id_comunidad, idtipo_persona, id]
         );
 
-        // 3. ACTUALIZAR/INSERTAR FICHA (Aquí estaba el problema)
-        
-        // Si es PACIENTE (1)
         if (idtipo_persona == 1 && datosPaciente) {
             await connection.query(
                 `INSERT INTO ficha_paciente (idpersona, diagnostico, hospital_origen, codigo_sis) 
@@ -185,7 +188,6 @@ const actualizarPersona = async (req, res) => {
             );
         }
 
-        // Si es ESTUDIANTE (2)
         if (idtipo_persona == 2 && datosEstudiante) {
             await connection.query(
                 `INSERT INTO ficha_estudiante (idpersona, institucion, carrera, ciclo_actual) 
@@ -215,7 +217,6 @@ const eliminarPersona = async (req, res) => {
     try {
         const { id } = req.params;
 
-        // 1. Verificar si la persona existe
         const [persona] = await connection.query('SELECT idpersona FROM persona WHERE idpersona = ?', [id]);
         
         if (persona.length === 0) {
@@ -223,9 +224,6 @@ const eliminarPersona = async (req, res) => {
             return res.status(404).json({ success: false, mensaje: "Persona no encontrada" });
         }
 
-        // 2. (OPCIONAL PERO RECOMENDADO) 
-        // Validar que NO tenga un hospedaje ACTIVO en este momento.
-        // No tiene sentido desactivar a alguien que está durmiendo en una habitación.
         const [hospedajeActivo] = await connection.query(
             "SELECT idregistro FROM registro WHERE idpersona = ? AND estado = 'ACTIVO'", 
             [id]
@@ -239,7 +237,6 @@ const eliminarPersona = async (req, res) => {
             });
         }
 
-        // 3. REALIZAR EL BORRADO LÓGICO (Cambiar estado)
         await connection.query(
             "UPDATE persona SET estado = 'INACTIVO' WHERE idpersona = ?", 
             [id]
@@ -258,7 +255,7 @@ const eliminarPersona = async (req, res) => {
         });
     }
 };
-// 6. Obtener personas por tipo
+
 const obtenerPersonasPorTipo = async (req, res) => {
     try {
         const { id } = req.params;
@@ -275,14 +272,11 @@ const obtenerPersonasPorTipo = async (req, res) => {
     }
 };
 
-// 7. Buscar por DNI (Para autocompletar)
-// personaController.js
 
 const buscarPorDni = async (req, res) => {
     try {
         const { dni } = req.params;
-        
-        // Traemos datos básicos
+
         const [persona] = await db.query('SELECT * FROM persona WHERE dni = ?', [dni]);
 
         if (persona.length === 0) {
@@ -291,11 +285,10 @@ const buscarPorDni = async (req, res) => {
 
         const datosPersona = persona[0];
 
-        // SI ES ESTUDIANTE (2), BUSCAMOS SU FICHA
         if (datosPersona.idtipo_persona === 2) {
             const [ficha] = await db.query('SELECT * FROM ficha_estudiante WHERE idpersona = ?', [datosPersona.idpersona]);
             if (ficha.length > 0) {
-                // Agregamos los datos al objeto de respuesta
+
                 datosPersona.datosEstudiante = {
                     institucion: ficha[0].institucion,
                     carrera: ficha[0].carrera,
@@ -304,7 +297,6 @@ const buscarPorDni = async (req, res) => {
             }
         }
 
-        // SI ES PACIENTE (1), BUSCAMOS SU FICHA
         if (datosPersona.idtipo_persona === 1) {
             const [ficha] = await db.query('SELECT * FROM ficha_paciente WHERE idpersona = ?', [datosPersona.idpersona]);
             if (ficha.length > 0) {

@@ -12,15 +12,12 @@ export class RegistroService {
   obtenerRegistros(): Observable<any> {
     return this.http.get<any>(this.apiUrl);
   }
-  // Guardar el ingreso
   crearRegistro(registro: Registro): Observable<ApiResponse> {
-    // CORRECCIÓN: Agregamos '/ingreso' para coincidir con el backend
     return this.http.post<ApiResponse>(`${this.apiUrl}/ingreso`, registro);
   }
   liberarHabitacion(idHabitacion: number): Observable<any> {
   return this.http.put(`${this.apiUrl}/liberar-habitacion/${idHabitacion}`, {});
 }
-// En RegistroService class...
 
 obtenerRegistroPorId(id: number): Observable<any> {
   return this.http.get(`${this.apiUrl}/${id}`);

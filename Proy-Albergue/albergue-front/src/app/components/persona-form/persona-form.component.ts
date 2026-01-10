@@ -4,6 +4,8 @@ import { FormsModule, NgForm } from '@angular/forms'; // Importar NgForm
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { PersonaService } from '../../services/persona.service';
 import { Persona } from '../../models/registro.interface';
+import { ComunidadService } from '../../services/comunidad.service';
+import { MaestroService } from '../../services/maestro.service';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -14,23 +16,36 @@ import Swal from 'sweetalert2';
   styleUrls: ['./persona-form.component.css']
 })
 export class PersonaFormComponent implements OnInit {
-
+listaInstituciones: any[] = [];
+  listaHospitales: any[] = [];
   persona: Persona = {
-    dni: '', nombres: '', apellidos: '', telefono: '', procedencia: '', idtipo_persona: 1
+    dni: '', nombres: '', apellidos: '', telefono: '', id_comunidad: undefined, idtipo_persona: 1,datosEstudiante: {
+    institucion: '',
+    carrera: '',
+    ciclo: ''
+  },
+  datosPaciente: {
+    diagnostico: '',
+    hospital: '',
+    sis: ''
+  }
   };
 
   titulo: string = 'Nuevo Huésped';
   esEdicion: boolean = false;
   idPersonaEditar: number = 0;
   isLoading: boolean = false;
-
+listaComunidades: any[] = [];
   constructor(
     private personaService: PersonaService,
+    private comunidadService: ComunidadService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private maestroService: MaestroService
   ) { }
 
   ngOnInit(): void {
+    this.cargarComunidades();
     this.route.params.subscribe(params => {
       const id = params['id'];
       if (id) {
@@ -38,10 +53,29 @@ export class PersonaFormComponent implements OnInit {
         this.idPersonaEditar = +id;
         this.titulo = 'Editar Huésped';
         this.cargarPersona(this.idPersonaEditar);
+        this.cargarListas();
       }
     });
   }
-
+  cargarListas() {
+    this.maestroService.getInstituciones().subscribe((res: any) => {
+        if(res.success) this.listaInstituciones = res.data;
+    });
+    
+    this.maestroService.getCentrosSalud().subscribe((res: any) => {
+        if(res.success) this.listaHospitales = res.data;
+    });
+  }
+cargarComunidades() {
+    this.comunidadService.obtenerComunidades().subscribe({
+      next: (res: any) => {
+        if (res.success) {
+          this.listaComunidades = res.data;
+        }
+      },
+      error: (err) => console.error('Error cargando comunidades', err)
+    });
+  }
   cargarPersona(id: number) {
     this.isLoading = true;
     this.personaService.obtenerPorId(id).subscribe({
@@ -70,7 +104,6 @@ export class PersonaFormComponent implements OnInit {
   }
   guardar(form: NgForm) {
 
-    // 1. VALIDACIÓN DEL FORMULARIO (Campos requeridos)
     if (form.invalid) {
       Object.values(form.controls).forEach(control => {
         control.markAsTouched();
@@ -84,7 +117,6 @@ export class PersonaFormComponent implements OnInit {
       return;
     }
 
-    // 2. VALIDACIÓN ESPECÍFICA (DNI exacto 8 dígitos)
     if (this.persona.dni.length !== 8) {
       Swal.fire({
         icon: 'warning',
@@ -98,7 +130,7 @@ export class PersonaFormComponent implements OnInit {
     this.isLoading = true;
 
     if (this.esEdicion) {
-      // --- MODO EDICIÓN ---
+
       this.personaService.actualizarPersona(this.idPersonaEditar, this.persona).subscribe({
         next: (res) => {
           if (res.success) {
@@ -122,38 +154,58 @@ export class PersonaFormComponent implements OnInit {
       });
 
     } else {
-      // --- MODO CREACIÓN (AQUÍ ESTÁ EL CAMBIO) ---
+
       this.personaService.crearPersona(this.persona).subscribe({
         next: (res) => {
-        if (res.success) {
-          
-          // AQUÍ ESTÁ LA LÓGICA DE DECISIÓN (Ya no depende del parámetro)
-          Swal.fire({
-            icon: 'success',
-            title: '¡Huésped Registrado!',
-            text: '¿Qué desea hacer a continuación?',
-            showCancelButton: true,
-            confirmButtonText: '<i class="bi bi-box-arrow-in-right"></i> Asignar Habitación',
-            cancelButtonText: '<i class="bi bi-list-ul"></i> Ir a la Lista',
-            confirmButtonColor: '#198754',
-            cancelButtonColor: '#6c757d',
-            reverseButtons: true
-          }).then((result) => {
-            if (result.isConfirmed) {
-              this.router.navigate(['/registro/nuevo'], { queryParams: { dni: this.persona.dni } });
-            } else {
-              this.router.navigate(['/personas']);
-            }
-          });
+          if (res.success) {
+            
+            // 1. Identificar si es Acompañante
+            // NOTA: Cambia el '3' por el ID que uses para acompañantes en tu BD
+            const esAcompanante = this.persona.idtipo_persona == 3; 
 
-        } else {
-          Swal.fire('Atención', res.message, 'warning');
-        }
-        this.isLoading = false;
-      },
+            if (esAcompanante) {
+              // --- CASO ACOMPAÑANTE: Solo confirmación simple ---
+              Swal.fire({
+                icon: 'success',
+                title: '¡Acompañante Registrado!',
+                text: 'Se ha guardado correctamente.',
+                confirmButtonText: '<i class="bi bi-list-ul"></i> Volver a la Lista',
+                confirmButtonColor: '#0d6efd'
+              }).then(() => {
+                this.router.navigate(['/personas']);
+              });
+
+            } else {
+              // --- CASO HUÉSPED TITULAR: Opción de Asignar Habitación ---
+              Swal.fire({
+                icon: 'success',
+                title: '¡Huésped Registrado!',
+                text: '¿Qué desea hacer a continuación?',
+                showCancelButton: true,
+                confirmButtonText: '<i class="bi bi-box-arrow-in-right"></i> Asignar Habitación',
+                cancelButtonText: '<i class="bi bi-list-ul"></i> Ir a la Lista',
+                confirmButtonColor: '#198754',
+                cancelButtonColor: '#6c757d',
+                reverseButtons: true
+              }).then((result) => {
+                if (result.isConfirmed) {
+                  // Ir a asignar habitación llevando el DNI
+                  this.router.navigate(['/registro/nuevo'], { queryParams: { dni: this.persona.dni } });
+                } else {
+
+                  this.router.navigate(['/personas']);
+                }
+              });
+            }
+
+          } else {
+            Swal.fire('Atención', res.message, 'warning');
+          }
+          this.isLoading = false;
+        },
         error: (err) => {
           console.error(err);
-          Swal.fire('Error', 'No se pudo registrar.', 'error');
+          Swal.fire('Error', 'Huesped ya Registrado.', 'error');
           this.isLoading = false;
         }
       });

@@ -12,8 +12,7 @@
     border-color: #86b7fe;
 }
 
-/* Validación suave */
 .form-control.is-invalid {
     border-color: #dc3545;
-    background-image: none; /* Quitamos el icono por defecto de bootstrap si molesta */
+    background-image: none; 
 }

@@ -13,14 +13,12 @@ export class UsuarioListComponent implements OnInit {
 
   usuarios: any[] = [];
 
-  // NUEVO
   nuevoUsuario = {
     username: '',
     password: '',
     rol: 'USUARIO'
   };
 
-  // EDITAR
   usuarioEditando: any = null;
   usuarioForm = {
     username: '',
@@ -34,9 +32,6 @@ export class UsuarioListComponent implements OnInit {
     this.cargarUsuarios();
   }
 
-  // =========================
-  // LISTAR
-  // =========================
   cargarUsuarios() {
     this.usuarioService.listar().subscribe({
       next: (res) => this.usuarios = res.data,
@@ -44,9 +39,7 @@ export class UsuarioListComponent implements OnInit {
     });
   }
 
-  // =========================
-  // CREAR
-  // =========================
+
   crearUsuario() {
     if (!this.nuevoUsuario.username || !this.nuevoUsuario.password) {
       alert('Complete todos los campos');
@@ -69,9 +62,7 @@ export class UsuarioListComponent implements OnInit {
     });
   }
 
-  // =========================
-  // CAMBIAR ESTADO (ENUM)
-  // =========================
+
   cambiarEstado(usuario: any) {
     if (!confirm('¿Seguro de cambiar el estado?')) return;
 
@@ -86,9 +77,6 @@ export class UsuarioListComponent implements OnInit {
       });
   }
 
-  // =========================
-  // EDITAR
-  // =========================
   abrirEditar(usuario: any) {
     this.usuarioEditando = usuario;
     this.usuarioForm = {
